@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@miragejs/server": "^0.1.29",
+    "@testing-library/react": "^9.4.0",
     "faker": "^4.1.0"
   }
 }

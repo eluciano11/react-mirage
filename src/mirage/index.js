@@ -2,7 +2,7 @@ import { Server, Model } from '@miragejs/server';
 
 import Factories from './factories/index';
 
-export function makeServer({ environment = 'development' } = {}) {
+export function createServer({ environment = 'development' } = {}) {
   return new Server({
     environment,
 

@@ -18,15 +18,19 @@ export default function() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div data-testid="loadingMovies">Loading...</div>;
+  }
+
+  if (movies.length === 0) {
+    return <div data-testid="emptyMovies">No movies to show :(</div>;
   }
 
   return (
-    <div>
+    <div data-testid="movieList">
       <Link to="/add">Add a movie</Link>
       <ul>
         {movies.map((movie, index) => (
-          <li key={index}>
+          <li key={index} data-testid="movie">
             <Link to={`/${movie.id}`}>
               {movie.title} {movie.release}
             </Link>
