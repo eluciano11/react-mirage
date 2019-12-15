@@ -1,10 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { Link } from 'react-router-dom';
 
+const STATES = {
+  idle: 'IDLE',
+  loading: 'LOADING',
+  success: 'SUCCESS',
+  failed: 'FAILED'
+};
+const EVENTS = {
+  fetch: 'FETCH',
+  resolved: 'RESOLVED',
+  rejected: 'REJECTED'
+};
+
+const initialState = {
+  status: STATES.idle,
+  data: []
+};
+
+function reducer(state = initialState, action) {
+  switch (action.type) {
+    case EVENTS.fetch: {
+      return Object.assign({}, state, {
+        status: STATES.loading,
+        data: []
+      });
+    }
+
+    case EVENTS.resolved: {
+      return Object.assign({}, state, {
+        status: STATES.success,
+        data: action.data
+      });
+    }
+
+    case EVENTS.rejected: {
+      return Object.assign({}, state, {
+        status: STATES.failed,
+        data: []
+      });
+    }
+
+    default: {
+      return state;
+    }
+  }
+}
+
 export default function() {
-  const [loading, setLoading] = useState(true);
-  const [movies, setMovies] = useState([]);
-  const [hasError, setHasError] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const getMovies = async () => {
@@ -17,43 +61,48 @@ export default function() {
 
         const { movies } = await res.json();
 
-        setHasError(false);
-        setLoading(false);
-        setMovies(movies);
+        return dispatch({ type: EVENTS.resolved, data: movies });
       } catch (error) {
-        setLoading(false);
-        setHasError(true);
-        setMovies([]);
+        return dispatch({ type: EVENTS.rejected });
       }
     };
 
+    dispatch({ type: EVENTS.fetch });
     getMovies();
   }, []);
 
-  if (hasError) {
-    return <div data-testid="errorMovies">Sorry, we found an error!</div>;
-  }
+  switch (state.status) {
+    case STATES.loading: {
+      return <div data-testid="loadingMovies">Loading...</div>;
+    }
 
-  if (loading) {
-    return <div data-testid="loadingMovies">Loading...</div>;
-  }
+    case STATES.failed: {
+      return <div data-testid="errorMovies">Sorry, we found an error!</div>;
+    }
 
-  if (movies.length === 0) {
-    return <div data-testid="emptyMovies">No movies to show :(</div>;
-  }
+    case STATES.success: {
+      if (state.data.length > 0) {
+        return (
+          <div data-testid="movieList">
+            <Link to="/add">Add a movie</Link>
+            <ul>
+              {state.data.map((movie, index) => (
+                <li key={index} data-testid="movie">
+                  <Link to={`/${movie.id}`}>
+                    {movie.title} {movie.release}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
 
-  return (
-    <div data-testid="movieList">
-      <Link to="/add">Add a movie</Link>
-      <ul>
-        {movies.map((movie, index) => (
-          <li key={index} data-testid="movie">
-            <Link to={`/${movie.id}`}>
-              {movie.title} {movie.release}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+      return <div data-testid="emptyMovies">No movies to show :(</div>;
+    }
+
+    default: {
+      return null;
+    }
+  }
 }

@@ -17,7 +17,7 @@ afterEach(() => {
   server.shutdown();
 });
 
-describe('Application tests', function() {
+describe('Movie list', function() {
   it('should render with loading state', async () => {
     // Render app
     const { getByTestId } = render(<MovieList />);
