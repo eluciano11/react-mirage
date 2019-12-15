@@ -4,18 +4,35 @@ import { Link } from 'react-router-dom';
 export default function() {
   const [loading, setLoading] = useState(true);
   const [movies, setMovies] = useState([]);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const getMovies = async () => {
-      const res = await fetch('/movies');
-      const { movies } = await res.json();
+      try {
+        const res = await fetch('/movies');
 
-      setLoading(false);
-      setMovies(movies);
+        if (res.status >= 400) {
+          throw res;
+        }
+
+        const { movies } = await res.json();
+
+        setHasError(false);
+        setLoading(false);
+        setMovies(movies);
+      } catch (error) {
+        setLoading(false);
+        setHasError(true);
+        setMovies([]);
+      }
     };
 
     getMovies();
   }, []);
+
+  if (hasError) {
+    return <div data-testid="errorMovies">Sorry, we found an error!</div>;
+  }
 
   if (loading) {
     return <div data-testid="loadingMovies">Loading...</div>;

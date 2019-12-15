@@ -4,6 +4,7 @@ import { waitForElement } from '@testing-library/react';
 import { render } from '../../../../tests/utils';
 import { createServer } from '../../../mirage/index';
 import MovieList from '../index.js';
+import { Response } from '@miragejs/server';
 
 // Create a server. It will be empty on every test case.
 let server;
@@ -46,5 +47,18 @@ describe('Application tests', function() {
     await waitForElement(() => getByTestId('emptyMovies'));
 
     expect(getByTestId('emptyMovies')).toBeTruthy();
+  });
+
+  it('should render error view when server returns a 500', async () => {
+    // Respond with an error
+    server.get('/movies', () => {
+      return new Response(500, {}, {});
+    });
+
+    const { getByTestId } = render(<MovieList />);
+
+    await waitForElement(() => getByTestId('errorMovies'));
+
+    expect(getByTestId('errorMovies')).toBeTruthy();
   });
 });
