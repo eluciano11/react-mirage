@@ -1,10 +1,12 @@
 import React from 'react';
+
 import { waitForElement } from '@testing-library/react';
+import { Response } from '@miragejs/server';
+import '@testing-library/jest-dom/extend-expect';
 
 import { render } from '../../../../tests/utils';
 import { createServer } from '../../../mirage/index';
 import MovieList from '../index.js';
-import { Response } from '@miragejs/server';
 
 // Create a server. It will be empty on every test case.
 let server;
@@ -24,7 +26,7 @@ describe('Movie list', function() {
 
     await waitForElement(() => getByTestId('loadingMovies'));
 
-    expect(getByTestId('loadingMovies')).toBeTruthy();
+    expect(getByTestId('loadingMovies')).toBeInTheDocument();
   });
 
   it('should render list of movies when the server responds', async () => {
@@ -46,7 +48,7 @@ describe('Movie list', function() {
     // Wait for lists to load
     await waitForElement(() => getByTestId('emptyMovies'));
 
-    expect(getByTestId('emptyMovies')).toBeTruthy();
+    expect(getByTestId('emptyMovies')).toBeInTheDocument();
   });
 
   it('should render error view when server returns a 500', async () => {
