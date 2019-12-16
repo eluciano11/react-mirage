@@ -2,7 +2,6 @@ import React from 'react';
 
 import { waitForElement } from '@testing-library/react';
 import { Response } from '@miragejs/server';
-import '@testing-library/jest-dom/extend-expect';
 
 import { render } from '../../../../tests/utils';
 import { createServer } from '../../../mirage/index';
