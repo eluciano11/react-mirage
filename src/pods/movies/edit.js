@@ -1,7 +1,7 @@
 import React from 'react';
 
-import MovieForm from '../../components/forms/movie';
-import { useMovie } from '../../hooks/index';
+import { MovieForm } from './components/index';
+import { useMovie } from './hooks/index';
 
 function EditMovie() {
   const { movie, loading } = useMovie();

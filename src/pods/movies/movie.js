@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
 
-import { useMovie } from '../../hooks/index';
+import { useMovie } from './hooks/index';
 
 export default function() {
   const { loading, movie } = useMovie();

@@ -50,7 +50,7 @@ function MovieForm(props) {
         rows="10"
         defaultValue={props.synopsis}
       ></textarea>
-      <button>Submit</button>
+      <button type="submit">Submit</button>
     </form>
   );
 }

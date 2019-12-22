@@ -1,5 +1,5 @@
 import React from 'react';
-import MovieForm from '../../components/forms/movie';
+import { MovieForm } from './components/index';
 
 function Add() {
   return <MovieForm isEditing={false} />;
