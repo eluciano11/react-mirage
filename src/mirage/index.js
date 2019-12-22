@@ -2,9 +2,14 @@ import { Server, Model } from '@miragejs/server';
 
 import Factories from './factories/index';
 
-export function createServer({ environment = 'development' } = {}) {
+export function createServer({
+  environment = 'development',
+  trackRequests = false
+} = {}) {
   return new Server({
     environment,
+
+    trackRequests,
 
     models: {
       movie: Model

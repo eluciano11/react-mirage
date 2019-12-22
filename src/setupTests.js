@@ -5,7 +5,7 @@ import { createServer } from '../src/mirage/index';
 let server;
 
 beforeEach(() => {
-  server = createServer({ environment: 'test' });
+  server = createServer({ environment: 'test', trackRequests: true });
 });
 
 afterEach(() => {
