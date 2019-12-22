@@ -73,17 +73,17 @@ export default function() {
 
   switch (state.status) {
     case STATES.loading: {
-      return <div data-testid="loadingMovies">Loading...</div>;
+      return <div data-testid="loading">Loading...</div>;
     }
 
     case STATES.failed: {
-      return <div data-testid="errorMovies">Sorry, we found an error!</div>;
+      return <div data-testid="error">Sorry, we found an error!</div>;
     }
 
     case STATES.success: {
       if (state.data.length > 0) {
         return (
-          <div data-testid="movieList">
+          <div data-testid="list">
             <Link to="/add">Add a movie</Link>
             <ul>
               {state.data.map((movie, index) => (
@@ -98,7 +98,7 @@ export default function() {
         );
       }
 
-      return <div data-testid="emptyMovies">No movies to show :(</div>;
+      return <div data-testid="empty">No movies to show :(</div>;
     }
 
     default: {
