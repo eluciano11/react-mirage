@@ -1,5 +1,68 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
+
+function FormValidationError({ errors }) {
+  this.type = 'FormValidationError';
+  this.errors = errors;
+}
+
+function NetworkError({ res, data }) {
+  this.type = res.status === 422 ? 'FormValidationError' : 'UnhandledError';
+  this.errors = data.errors;
+}
+
+function hasContent({ field }) {
+  if (field && field != null) {
+    return {
+      isValid: true,
+      cleanData: field,
+      error: null
+    };
+  }
+
+  return {
+    isValid: false,
+    cleanData: null,
+    error: 'This field is required.'
+  };
+}
+
+function validateForm({ fields }) {
+  let allFieldsValid = true;
+
+  const result = Object.keys(fields).reduce(
+    (prev, current) => {
+      let entry = fields[current];
+
+      if (!entry.isValid) {
+        allFieldsValid = false;
+
+        return {
+          ...prev,
+          errors: {
+            ...prev.errors,
+            [current]: entry.error
+          }
+        };
+      }
+
+      return {
+        ...prev,
+        cleanData: {
+          ...prev.cleanData,
+          [current]: entry.cleanData
+        }
+      };
+    },
+    { cleanData: {}, errors: {} }
+  );
+
+  if (allFieldsValid) {
+    return { cleanData: result.cleanData };
+  }
+
+  throw new FormValidationError({ errors: result.errors });
+}
 
 function MovieForm(props) {
   const title = useRef(props.title || null);
@@ -7,51 +70,94 @@ function MovieForm(props) {
   const synopsis = useRef(props.synopsis || null);
   const { id } = useParams();
   const history = useHistory();
+  const [errors, setErrors] = useState(null);
 
   const handleSubmit = useCallback(
     async event => {
       event.preventDefault();
 
-      const data = {
-        title: title.current.value,
-        release: release.current.value,
-        synopsis: synopsis.current.value
-      };
-      const endpoint = props.isEditing ? `/movies/${id}/` : '/movies';
-      const method = props.isEditing ? 'PATCH' : 'POST';
+      try {
+        const fields = {
+          title: hasContent({ field: title.current.value }),
+          release: hasContent({ field: release.current.value }),
+          synopsis: hasContent({ field: synopsis.current.value })
+        };
+        const { cleanData } = validateForm({ fields });
+        const endpoint = props.isEditing ? `/movies/${id}/` : '/movies';
+        const method = props.isEditing ? 'PATCH' : 'POST';
 
-      await fetch(endpoint, {
-        method,
-        body: JSON.stringify({ data: { type: 'movies', attributes: data } })
-      });
+        const res = await fetch(endpoint, {
+          method,
+          body: JSON.stringify({
+            data: { type: 'movies', attributes: cleanData }
+          })
+        });
+        const data = await res.json();
 
-      history.push('/');
+        if (res.status >= 200 && res.status <= 299) {
+          history.push('/');
+        } else {
+          throw new NetworkError({ res, data });
+        }
+      } catch (error) {
+        // Handle field validation errors.
+        if (error.type === 'FormValidationError') {
+          setErrors(error.errors);
+        } else {
+          // Unhandled exceptions.
+          setErrors({
+            general: 'Ops! Something when wrong, please try again.'
+          });
+        }
+      }
     },
-    [history, id, props.isEditing]
+    [history, id, props.isEditing, setErrors]
   );
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="title">Title</label>
-      <input ref={title} id="title" type="text" defaultValue={props.title} />
-      <label htmlFor="release">Release date</label>
-      <input
-        ref={release}
-        id="release"
-        type="text"
-        defaultValue={props.release}
-      />
-      <label htmlFor="synopsis">Synopsis</label>
-      <textarea
-        ref={synopsis}
-        name="synopsis"
-        id="synopsis"
-        cols="30"
-        rows="10"
-        defaultValue={props.synopsis}
-      ></textarea>
-      <button type="submit">Submit</button>
-    </form>
+    <section>
+      {errors && <p data-testid="general-error">{errors.general}</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="title">Title</label>
+          <input
+            ref={title}
+            id="title"
+            type="text"
+            data-testid="title"
+            defaultValue={props.title}
+          />
+          {errors && <p data-testid="title-error">{errors.title}</p>}
+        </div>
+        <div>
+          <label htmlFor="release">Release date</label>
+          <input
+            ref={release}
+            id="release"
+            type="text"
+            data-testid="release"
+            defaultValue={props.release}
+          />
+          {errors && <p data-testid="release-error">{errors.release}</p>}
+        </div>
+        <div>
+          <label htmlFor="synopsis">Synopsis</label>
+          <textarea
+            ref={synopsis}
+            name="synopsis"
+            id="synopsis"
+            cols="30"
+            rows="10"
+            data-testid="synopsis"
+            defaultValue={props.synopsis}
+          ></textarea>
+          {errors && <p data-testid="synopsis-error">{errors.synopsis}</p>}
+        </div>
+        <button type="submit" data-testid="submit">
+          Submit
+        </button>
+      </form>
+    </section>
   );
 }
 
