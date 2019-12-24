@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+
 import { useParams, useHistory } from 'react-router-dom';
 
 function FormValidationError({ errors }) {
@@ -64,10 +65,10 @@ function validateForm({ fields }) {
   throw new FormValidationError({ errors: result.errors });
 }
 
-function MovieForm(props) {
-  const title = useRef(props.title || null);
-  const release = useRef(props.release || null);
-  const synopsis = useRef(props.synopsis || null);
+function MovieForm({ title, release, synopsis, isEditing }) {
+  const titleRef = useRef(title || null);
+  const releaseRef = useRef(release || null);
+  const synopsisRef = useRef(synopsis || null);
   const { id } = useParams();
   const history = useHistory();
   const [errors, setErrors] = useState(null);
@@ -78,13 +79,13 @@ function MovieForm(props) {
 
       try {
         const fields = {
-          title: hasContent({ field: title.current.value }),
-          release: hasContent({ field: release.current.value }),
-          synopsis: hasContent({ field: synopsis.current.value })
+          title: hasContent({ field: titleRef.current.value }),
+          release: hasContent({ field: releaseRef.current.value }),
+          synopsis: hasContent({ field: synopsisRef.current.value })
         };
         const { cleanData } = validateForm({ fields });
-        const endpoint = props.isEditing ? `/movies/${id}/` : '/movies';
-        const method = props.isEditing ? 'PATCH' : 'POST';
+        const endpoint = isEditing ? `/movies/${id}/` : '/movies';
+        const method = isEditing ? 'PATCH' : 'POST';
 
         const res = await fetch(endpoint, {
           method,
@@ -111,7 +112,7 @@ function MovieForm(props) {
         }
       }
     },
-    [history, id, props.isEditing, setErrors]
+    [history, id, isEditing, setErrors]
   );
 
   return (
@@ -121,35 +122,35 @@ function MovieForm(props) {
         <div>
           <label htmlFor="title">Title</label>
           <input
-            ref={title}
+            ref={titleRef}
             id="title"
             type="text"
             data-testid="title"
-            defaultValue={props.title}
+            defaultValue={title}
           />
           {errors && <p data-testid="title-error">{errors.title}</p>}
         </div>
         <div>
           <label htmlFor="release">Release date</label>
           <input
-            ref={release}
+            ref={releaseRef}
             id="release"
             type="text"
             data-testid="release"
-            defaultValue={props.release}
+            defaultValue={release}
           />
           {errors && <p data-testid="release-error">{errors.release}</p>}
         </div>
         <div>
           <label htmlFor="synopsis">Synopsis</label>
           <textarea
-            ref={synopsis}
+            ref={synopsisRef}
             name="synopsis"
             id="synopsis"
             cols="30"
             rows="10"
             data-testid="synopsis"
-            defaultValue={props.synopsis}
+            defaultValue={synopsis}
           ></textarea>
           {errors && <p data-testid="synopsis-error">{errors.synopsis}</p>}
         </div>
