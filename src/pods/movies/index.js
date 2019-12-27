@@ -47,7 +47,7 @@ function reducer(state = initialState, action) {
   }
 }
 
-export default function() {
+export default function Movies() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -84,11 +84,27 @@ export default function() {
       if (state.data.length > 0) {
         return (
           <div data-testid="list">
-            <Link to="/add">Add a movie</Link>
-            <ul>
+            <div className="text-right m-2">
+              <Link
+                className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold"
+                to="/add"
+              >
+                Add a movie
+              </Link>
+            </div>
+            <ul className="my-2 overflow-y">
               {state.data.map((movie, index) => (
-                <li key={index} data-testid="movie">
-                  <Link to={`/${movie.id}`}>
+                <li
+                  className={`border border-solid border-gray-200 border-r-0 border-l-0 ${
+                    index + 1 !== state.data.length ? 'border-b-0' : ''
+                  }`}
+                  key={index}
+                  data-testid="movie"
+                >
+                  <Link
+                    className="block text-lg py-2 px-4 hover:bg-gray-100"
+                    to={`/${movie.id}`}
+                  >
                     {movie.title} {movie.release}
                   </Link>
                 </li>
