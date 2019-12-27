@@ -3,6 +3,16 @@ import { Link, useParams, useHistory } from 'react-router-dom';
 
 import { useMovie } from './hooks/index';
 
+const GENERIC_ERROR = {
+  general:
+    'Ops! Something went wrong while deleting your movie, please try again!'
+};
+
+function NetworkError({ res, data }) {
+  this.type = res.status === 403 ? 'ForbiddenError' : 'UnhandledError';
+  this.errors = data.errors;
+}
+
 export default function() {
   const { loading, movie } = useMovie();
   const history = useHistory();
@@ -13,14 +23,19 @@ export default function() {
   const handleDelete = useCallback(async () => {
     try {
       setDelete(true);
-      await fetch(`/movies/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/movies/${id}`, { method: 'DELETE' });
+      const data = await res.json();
 
-      history.push('/');
+      if (res.status >= 200 && res.status <= 299) {
+        history.push('/');
+      } else {
+        throw new NetworkError({ res, data });
+      }
     } catch (error) {
-      setError({
-        general:
-          'Ops! Something went wrong while deleting your movie, please try again!'
-      });
+      let errors = error.errors || GENERIC_ERROR;
+
+      setDelete(false);
+      setError(errors);
     }
   }, [history, id]);
 
@@ -30,16 +45,16 @@ export default function() {
 
   return (
     <div>
-      {error && <p>{error.general}</p>}
+      {error && <p data-testid="general-error">{error.general}</p>}
       <img
         src={movie.poster}
         alt="movie poster"
         style={{ height: 300, width: 300 }}
       />
-      <h3>{movie.title}</h3>
-      <p>{movie.release}</p>
-      <p>{movie.synopsis}</p>
-      <button onClick={handleDelete} disabled={isDeleting}>
+      <h3 data-testid="title">{movie.title}</h3>
+      <p data-testid="release">{movie.release}</p>
+      <p data-testid="synopsis">{movie.synopsis}</p>
+      <button onClick={handleDelete} data-testid="delete" disabled={isDeleting}>
         {isDeleting ? 'Deleting...' : 'Delete'}
       </button>
       <Link to={`/${id}/edit`} disabled={isDeleting}>
