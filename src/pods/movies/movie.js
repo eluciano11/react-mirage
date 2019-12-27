@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useReducer } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
 
 import { Modal } from '../components/index';
@@ -14,20 +14,109 @@ function NetworkError({ res, data }) {
   this.errors = data.errors;
 }
 
+const STATES = {
+  idle: 'IDLE',
+  confirming: 'CONFIRMING',
+  loading: 'LOADING',
+  failed: 'FAILED'
+};
+
+const EVENTS = {
+  delete: 'DELETE',
+  confirmed: 'CONFIRMED',
+  canceled: 'CANCELED',
+  resolved: 'RESOLVED',
+  rejected: 'REJECTED'
+};
+
+const initialState = {
+  status: STATES.idle,
+  errors: null
+};
+
+function reducer(state = initialState, action) {
+  debugger;
+  switch (state.status) {
+    case STATES.idle: {
+      switch (action.type) {
+        case EVENTS.delete: {
+          return Object.assign({}, state, {
+            status: STATES.confirming,
+            errors: null
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
+    }
+
+    case STATES.failed:
+    case STATES.confirming: {
+      switch (action.type) {
+        case EVENTS.canceled: {
+          return Object.assign({}, state, {
+            status: STATES.idle,
+            errors: null
+          });
+        }
+
+        case EVENTS.confirmed: {
+          return Object.assign({}, state, {
+            status: STATES.loading,
+            errors: null
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
+    }
+
+    case STATES.loading: {
+      switch (action.type) {
+        case EVENTS.resolved: {
+          return Object.assign({}, state, {
+            status: STATES.idle,
+            errors: null
+          });
+        }
+
+        case EVENTS.rejected: {
+          return Object.assign({}, state, {
+            status: STATES.failed,
+            errors: action.errors
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
+    }
+
+    default: {
+      return state;
+    }
+  }
+}
+
 export default function Movie() {
   const movie = useMovie();
   const history = useHistory();
   const { id } = useParams();
-  const [isDeleting, setDelete] = useState(false);
-  const [error, setError] = useState(null);
-  const [isConfirming, setConfirm] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleDelete = useCallback(async () => {
+    dispatch({ type: EVENTS.confirmed });
+
     try {
-      setDelete(true);
       const res = await fetch(`/movies/${id}`, { method: 'DELETE' });
 
       if (res.status >= 200 && res.status <= 299) {
+        dispatch({ type: EVENTS.resolved });
         history.push('/');
       } else {
         const data = await res.json();
@@ -37,14 +126,13 @@ export default function Movie() {
     } catch (error) {
       let errors = error.errors || GENERIC_ERROR;
 
-      setDelete(false);
-      setError(errors);
+      dispatch({ type: EVENTS.rejected, errors });
     }
-  }, [history, id]);
+  }, [history, id, state]);
 
-  const toggleConfirm = useCallback(() => {
-    setConfirm(!isConfirming);
-  }, [isConfirming]);
+  const toggleConfirm = useCallback(action => {
+    dispatch({ type: action });
+  }, []);
 
   switch (movie.status) {
     case 'LOADING': {
@@ -62,26 +150,30 @@ export default function Movie() {
     case 'SUCCESS': {
       return (
         <div data-testid="movie-details">
-          <Modal isOpen={isConfirming}>
+          {state.status === STATES.failed && (
+            <p data-testid="general-error">{state.errors.general}</p>
+          )}
+          <Modal isOpen={state.status === STATES.confirming}>
             <div>Are you sure you want to close delete this movie?</div>
             <div>
               <button
                 onClick={handleDelete}
                 data-testid="confirm"
-                disabled={isDeleting}
+                disabled={state.status === STATES.loading}
               >
-                {isDeleting ? 'Deleting...' : 'Yes, delete'}
+                {state.status === STATES.loading
+                  ? 'Deleting...'
+                  : 'Yes, delete'}
               </button>
               <button
-                onClick={toggleConfirm}
+                onClick={() => toggleConfirm(EVENTS.canceled)}
                 data-testid="cancel"
-                disabled={isDeleting}
+                disabled={state.status === STATES.loading}
               >
                 Cancel
               </button>
             </div>
           </Modal>
-          {error && <p data-testid="general-error">{error.general}</p>}
           <img
             src={movie.poster}
             alt="movie poster"
@@ -91,13 +183,13 @@ export default function Movie() {
           <p data-testid="release">{movie.data.release}</p>
           <p data-testid="synopsis">{movie.data.synopsis}</p>
           <button
-            onClick={toggleConfirm}
+            onClick={() => toggleConfirm(EVENTS.delete)}
             data-testid="delete"
-            disabled={isDeleting}
+            disabled={state.status === STATES.loading}
           >
             Delete
           </button>
-          <Link to={`/${id}/edit`} disabled={isDeleting}>
+          <Link to={`/${id}/edit`} disabled={state.status === STATES.loading}>
             Edit
           </Link>
         </div>
