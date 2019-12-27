@@ -39,8 +39,6 @@ export default function() {
     }
   }, [history, id]);
 
-  console.log({ loading, errors });
-
   if (loading) {
     return <div>Loading...</div>;
   }

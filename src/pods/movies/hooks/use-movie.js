@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 
 function NetworkError({ res, data }) {
@@ -21,7 +21,7 @@ const EVENTS = {
 
 const initialState = {
   status: STATES.idle,
-  data: null,
+  data: {},
   errors: null
 };
 
@@ -55,7 +55,7 @@ function reducer(state = initialState, action) {
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            data: null,
+            data: {},
             errors: action.errors
           });
         }
@@ -73,39 +73,32 @@ function reducer(state = initialState, action) {
 }
 
 function useMovie() {
-  const [loading, setLoading] = useState(true);
-  const [movie, setMovie] = useState({});
-  const [errors, setErrors] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { id } = useParams();
 
   useEffect(() => {
     const getMovie = async () => {
-      debugger;
       try {
         const res = await fetch(`/movies/${id}`);
         const data = await res.json();
 
         if (res.status >= 200 && res.status <= 299) {
-          console.log('testing');
-          setLoading(false);
-          setMovie(data.movie);
-          setErrors(null);
+          dispatch({ type: EVENTS.resolved, data: data.movie });
         } else {
           throw new NetworkError({ res, data });
         }
       } catch (error) {
-        console.log({ error });
-        setLoading(false);
-        setMovie({});
-        setErrors(error.errors);
+        dispatch({ type: EVENTS.rejected, errors: error.errors });
       }
     };
 
+    dispatch({ type: EVENTS.fetch });
     getMovie();
   }, [id]);
 
-  debugger;
-  console.log({ loading, movie, errors });
+  const loading = state.status === STATES.loading;
+  const errors = state.status === STATES.failed ? state.errors : null;
+  const movie = state.status === STATES.completed ? state.data : {};
 
   return { loading, movie, errors };
 }
