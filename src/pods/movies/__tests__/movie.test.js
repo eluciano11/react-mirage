@@ -57,6 +57,11 @@ describe('Movie details', function() {
 
     userEvent.click(getByTestId('delete'));
 
+    await wait(() => expect(getByTestId('modal')).toBeInTheDocument());
+    expect(getByTestId('confirm')).toBeEnabled();
+
+    userEvent.click(getByTestId('confirm'));
+
     // Make sure that the form made a request.
     const requests = server.pretender.handledRequests;
 
@@ -86,6 +91,11 @@ describe('Movie details', function() {
     expect(getByTestId('delete')).toBeEnabled();
 
     userEvent.click(getByTestId('delete'));
+
+    await wait(() => expect(getByTestId('modal')).toBeInTheDocument());
+    expect(getByTestId('confirm')).toBeEnabled();
+
+    userEvent.click(getByTestId('confirm'));
 
     // Should display general error message
     await wait(() => expect(getByTestId('general-error')).toBeInTheDocument());
@@ -122,6 +132,11 @@ describe('Movie details', function() {
     expect(getByTestId('delete')).toBeEnabled();
 
     userEvent.click(getByTestId('delete'));
+
+    await wait(() => expect(getByTestId('modal')).toBeInTheDocument());
+    expect(getByTestId('confirm')).toBeEnabled();
+
+    userEvent.click(getByTestId('confirm'));
 
     // Should display general error message
     await wait(() => expect(getByTestId('general-error')).toBeInTheDocument());
