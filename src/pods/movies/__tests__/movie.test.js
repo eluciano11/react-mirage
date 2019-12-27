@@ -157,4 +157,34 @@ describe('Movie details', function() {
     expect(deleteMovieRequest.method).toEqual('DELETE');
     expect(deleteMovieRequest.status).toBe(500);
   });
+
+  it('should close the confirmation modal when the user cancels the request', async () => {
+    server.create('movie');
+
+    const { getByTestId, queryByTestId } = render(<Movie />);
+
+    await wait(() => expect(getByTestId('delete')).toBeInTheDocument());
+    expect(getByTestId('delete')).toBeEnabled();
+
+    userEvent.click(getByTestId('delete'));
+
+    await wait(() => expect(getByTestId('modal')).toBeInTheDocument());
+    expect(getByTestId('cancel')).toBeEnabled();
+
+    userEvent.click(getByTestId('cancel'));
+
+    // Make sure that the confirmation modal is not visible.
+    expect(queryByTestId('modal')).not.toBeInTheDocument();
+    expect(queryByTestId('cancel')).not.toBeInTheDocument();
+    expect(queryByTestId('confirm')).not.toBeInTheDocument();
+
+    // Make sure that the form made a request.
+    const requests = server.pretender.handledRequests;
+    const getMovieRequest = requests[0];
+
+    // Should load the movie correctly.
+    expect(requests).toHaveLength(1);
+    expect(getMovieRequest.method).toEqual('GET');
+    expect(getMovieRequest.status).toBe(200);
+  });
 });
