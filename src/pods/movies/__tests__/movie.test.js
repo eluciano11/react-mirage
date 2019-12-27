@@ -15,27 +15,37 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('Movie details', function() {
-  // it('should render the movie details when the load is successful', async () => {
-  //   const title = 'The testing movie';
-  //   const release = '2019';
-  //   const synopsis = 'This is just a test';
+  it('should render the movie details when the load is successful', async () => {
+    const title = 'The testing movie';
+    const release = '2019';
+    const synopsis = 'This is just a test';
 
-  //   server.create('movie', {
-  //     title,
-  //     release,
-  //     synopsis
-  //   });
+    server.create('movie', {
+      title,
+      release,
+      synopsis
+    });
 
-  //   const { getByTestId } = render(<Movie />);
+    const { getByTestId } = render(<Movie />);
 
-  //   await wait(() => expect(getByTestId('title')).toBeInTheDocument());
+    await wait(() => expect(getByTestId('title')).toBeInTheDocument());
 
-  //   expect(getByTestId('title')).toHaveTextContent(title);
-  //   expect(getByTestId('release')).toHaveTextContent(release);
-  //   expect(getByTestId('synopsis')).toHaveTextContent(synopsis);
-  // });
+    expect(getByTestId('title')).toHaveTextContent(title);
+    expect(getByTestId('release')).toHaveTextContent(release);
+    expect(getByTestId('synopsis')).toHaveTextContent(synopsis);
+  });
 
-  // it('should handle errors when fetching the movie details', () => {});
+  it('should handle errors when fetching the movie details', async () => {
+    server.get('/movies/1', () => {
+      return new Response(500, {}, {});
+    });
+
+    const { getByTestId } = render(<Movie />);
+
+    await wait(() =>
+      expect(getByTestId('movie-loading-error')).toBeInTheDocument()
+    );
+  });
 
   it('should delete the movie successfully', async () => {
     server.create('movie');

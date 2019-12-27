@@ -14,7 +14,7 @@ function NetworkError({ res, data }) {
 }
 
 export default function() {
-  const { loading, movie } = useMovie();
+  const { loading, movie, errors } = useMovie();
   const history = useHistory();
   const { id } = useParams();
   const [isDeleting, setDelete] = useState(false);
@@ -39,8 +39,18 @@ export default function() {
     }
   }, [history, id]);
 
+  console.log({ loading, errors });
+
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (errors) {
+    return (
+      <div data-testid="movie-loading-error">
+        Ops! An error occurred while loading the movie.
+      </div>
+    );
   }
 
   return (
