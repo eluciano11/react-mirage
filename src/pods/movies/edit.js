@@ -6,8 +6,6 @@ import { useMovie } from './hooks/index';
 function EditMovie() {
   const { movie, loading } = useMovie();
 
-  console.log({ movie, loading });
-
   if (loading) {
     return <div>Loading...</div>;
   }

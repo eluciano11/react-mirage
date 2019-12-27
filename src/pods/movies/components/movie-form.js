@@ -1,6 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useReducer } from 'react';
 
 import { useParams, useHistory } from 'react-router-dom';
+
+const GENERIC_ERROR = {
+  general: 'Ops! Something went wrong, please try again!'
+};
 
 function FormValidationError({ errors }) {
   this.type = 'FormValidationError';
@@ -65,17 +69,83 @@ function validateForm({ fields }) {
   throw new FormValidationError({ errors: result.errors });
 }
 
+const STATES = {
+  idle: 'IDLE',
+  loading: 'LOADING',
+  failed: 'FAILED',
+  completed: 'COMPLETED'
+};
+
+const EVENTS = {
+  submitted: 'SUBMITTED',
+  resolved: 'RESOLVED',
+  rejected: 'REJECTED'
+};
+
+const initialState = {
+  status: STATES.idle,
+  errors: null
+};
+
+function reducer(state = initialState, action) {
+  switch (state.status) {
+    case STATES.failed:
+    case STATES.idle: {
+      switch (action.type) {
+        case EVENTS.submitted: {
+          return Object.assign({}, state, {
+            status: STATES.loading,
+            errors: null
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
+    }
+
+    case STATES.loading: {
+      switch (action.type) {
+        case EVENTS.resolved: {
+          return Object.assign({}, state, {
+            status: STATES.completed,
+            errors: null
+          });
+        }
+
+        case EVENTS.rejected: {
+          return Object.assign({}, state, {
+            status: STATES.failed,
+            errors: action.errors
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
+    }
+
+    default: {
+      return state;
+    }
+  }
+}
+
 function MovieForm({ title, release, synopsis, isEditing }) {
   const titleRef = useRef(title || null);
   const releaseRef = useRef(release || null);
   const synopsisRef = useRef(synopsis || null);
   const { id } = useParams();
   const history = useHistory();
-  const [errors, setErrors] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleSubmit = useCallback(
     async event => {
       event.preventDefault();
+
+      dispatch({ type: EVENTS.submitted });
 
       try {
         const fields = {
@@ -96,28 +166,26 @@ function MovieForm({ title, release, synopsis, isEditing }) {
         const data = await res.json();
 
         if (res.status >= 200 && res.status <= 299) {
+          dispatch({ type: EVENTS.resolved });
           history.push('/');
         } else {
           throw new NetworkError({ res, data });
         }
       } catch (error) {
-        // Handle field validation errors.
-        if (error.type === 'FormValidationError') {
-          setErrors(error.errors);
-        } else {
-          // Unhandled exceptions.
-          setErrors({
-            general: 'Ops! Something when wrong, please try again.'
-          });
-        }
+        const errors =
+          error.type === 'FormValidationError' ? error.errors : GENERIC_ERROR;
+
+        dispatch({ type: EVENTS.rejected, errors });
       }
     },
-    [history, id, isEditing, setErrors]
+    [history, id, isEditing]
   );
 
   return (
     <section>
-      {errors && <p data-testid="general-error">{errors.general}</p>}
+      {state.status === STATES.failed && (
+        <p data-testid="general-error">{state.errors.general}</p>
+      )}
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="title">Title</label>
@@ -127,8 +195,11 @@ function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="title"
             defaultValue={title}
+            disabled={state.status === STATES.loading}
           />
-          {errors && <p data-testid="title-error">{errors.title}</p>}
+          {state.status === STATES.failed && (
+            <p data-testid="title-error">{state.errors.title}</p>
+          )}
         </div>
         <div>
           <label htmlFor="release">Release date</label>
@@ -138,8 +209,11 @@ function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="release"
             defaultValue={release}
+            disabled={state.status === STATES.loading}
           />
-          {errors && <p data-testid="release-error">{errors.release}</p>}
+          {state.status === STATES.failed && (
+            <p data-testid="release-error">{state.errors.release}</p>
+          )}
         </div>
         <div>
           <label htmlFor="synopsis">Synopsis</label>
@@ -151,11 +225,18 @@ function MovieForm({ title, release, synopsis, isEditing }) {
             rows="10"
             data-testid="synopsis"
             defaultValue={synopsis}
+            disabled={state.status === STATES.loading}
           ></textarea>
-          {errors && <p data-testid="synopsis-error">{errors.synopsis}</p>}
+          {state.status === STATES.failed && (
+            <p data-testid="synopsis-error">{state.errors.synopsis}</p>
+          )}
         </div>
-        <button type="submit" data-testid="submit">
-          Submit
+        <button
+          type="submit"
+          data-testid="submit"
+          disabled={state.status === STATES.loading}
+        >
+          {state.status === STATES.loading ? 'Adding' : 'Add'}
         </button>
       </form>
     </section>
