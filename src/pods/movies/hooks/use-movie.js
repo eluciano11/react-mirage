@@ -10,7 +10,7 @@ const STATES = {
   idle: 'IDLE',
   loading: 'LOADING',
   failed: 'FAILED',
-  completed: 'COMPLETED'
+  success: 'SUCCESS'
 };
 
 const EVENTS = {
@@ -46,7 +46,7 @@ function reducer(state = initialState, action) {
       switch (action.type) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
-            status: STATES.completed,
+            status: STATES.success,
             data: action.data,
             errors: null
           });
@@ -96,11 +96,7 @@ function useMovie() {
     getMovie();
   }, [id]);
 
-  const loading = state.status === STATES.loading;
-  const errors = state.status === STATES.failed ? state.errors : null;
-  const movie = state.status === STATES.completed ? state.data : {};
-
-  return { loading, movie, errors };
+  return state;
 }
 
 export default useMovie;

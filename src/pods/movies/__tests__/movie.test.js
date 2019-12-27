@@ -28,7 +28,7 @@ describe('Movie details', function() {
 
     const { getByTestId } = render(<Movie />);
 
-    await wait(() => expect(getByTestId('title')).toBeInTheDocument());
+    await wait(() => expect(getByTestId('movie-details')).toBeInTheDocument());
 
     expect(getByTestId('title')).toHaveTextContent(title);
     expect(getByTestId('release')).toHaveTextContent(release);

@@ -4,13 +4,25 @@ import { MovieForm } from './components/index';
 import { useMovie } from './hooks/index';
 
 function EditMovie() {
-  const { movie, loading } = useMovie();
+  const movie = useMovie();
 
-  if (loading) {
-    return <div>Loading...</div>;
+  switch (movie.state) {
+    case 'LOADING': {
+      return <div>Loading...</div>;
+    }
+
+    case 'FAILED': {
+      return <div>Failed to load movie</div>;
+    }
+
+    case 'SUCCESS': {
+      return <MovieForm {...movie.data} isEditing={true} />;
+    }
+
+    default: {
+      return null;
+    }
   }
-
-  return <MovieForm {...movie} isEditing={true} />;
 }
 
 export default EditMovie;
