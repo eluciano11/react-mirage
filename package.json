@@ -9,8 +9,9 @@
     "react-scripts": "3.2.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "yarn run build:style && react-scripts start",
     "build": "react-scripts build",
+    "build:style": "tailwind build src/styles/tailwind.css -o src/styles/index.css",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache"
@@ -37,6 +38,7 @@
     "@testing-library/user-event": "^8.0.2",
     "@typescript-eslint/eslint-plugin": "2.x",
     "@typescript-eslint/parser": "2.x",
+    "autoprefixer": "^9.7.3",
     "babel-eslint": "10.x",
     "eslint": "6.x",
     "eslint-config-react-app": "^5.1.0",
@@ -45,6 +47,8 @@
     "eslint-plugin-jsx-a11y": "6.x",
     "eslint-plugin-react": "7.x",
     "eslint-plugin-react-hooks": "1.x",
-    "faker": "^4.1.0"
+    "faker": "^4.1.0",
+    "postcss": "^7.0.25",
+    "tailwindcss": "^1.1.4"
   }
 }
