@@ -83,10 +83,11 @@ export default function Movies() {
     case STATES.success: {
       if (state.data.length > 0) {
         return (
-          <div data-testid="list">
-            <div className="text-right m-2">
+          <section className="w-11/12 m-auto" data-testid="list">
+            <div className="flex justify-between items-center m-2">
+              <h3 className="text-2xl font-semibold">Movies</h3>
               <Link
-                className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold"
+                className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
                 to="/add"
               >
                 Add a movie
@@ -110,7 +111,7 @@ export default function Movies() {
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         );
       }
 

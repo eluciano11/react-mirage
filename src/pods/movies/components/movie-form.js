@@ -133,7 +133,7 @@ function reducer(state = initialState, action) {
   }
 }
 
-function MovieForm({ title, release, synopsis, isEditing }) {
+export default function MovieForm({ title, release, synopsis, isEditing }) {
   const titleRef = useRef(title || null);
   const releaseRef = useRef(release || null);
   const synopsisRef = useRef(synopsis || null);
@@ -182,43 +182,62 @@ function MovieForm({ title, release, synopsis, isEditing }) {
   );
 
   return (
-    <section>
+    <div>
       {state.status === STATES.failed && (
         <p data-testid="general-error">{state.errors.general}</p>
       )}
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title</label>
+        <div className="mb-4">
+          <label className="block mb-2 font-medium" htmlFor="title">
+            Title
+          </label>
           <input
             ref={titleRef}
+            className="py-1 px-2 border rounded w-full mb-1"
             id="title"
             type="text"
             data-testid="title"
             defaultValue={title}
             disabled={state.status === STATES.loading}
           />
-          {state.status === STATES.failed && (
-            <p data-testid="title-error">{state.errors.title}</p>
-          )}
+          <p
+            className={`text-xs text-red-500 ${
+              state.status === STATES.failed ? 'visible' : 'hidden'
+            }`}
+            data-testid="title-error"
+          >
+            {state.status === STATES.failed ? state.errors.title : ''}
+          </p>
         </div>
-        <div>
-          <label htmlFor="release">Release date</label>
+        <div className="mb-4">
+          <label className="block mb-2 font-medium" htmlFor="release">
+            Release date
+          </label>
           <input
             ref={releaseRef}
+            className="py-1 px-2 border rounded w-full mb-1"
             id="release"
             type="text"
             data-testid="release"
             defaultValue={release}
             disabled={state.status === STATES.loading}
           />
-          {state.status === STATES.failed && (
-            <p data-testid="release-error">{state.errors.release}</p>
-          )}
+          <p
+            className={`text-xs text-red-500 ${
+              state.status === STATES.failed ? 'visible' : 'hidden'
+            }`}
+            data-testid="title-error"
+          >
+            {state.status === STATES.failed ? state.errors.release : ''}
+          </p>
         </div>
-        <div>
-          <label htmlFor="synopsis">Synopsis</label>
+        <div className="mb-4">
+          <label className="block mb-2 font-medium" htmlFor="synopsis">
+            Synopsis
+          </label>
           <textarea
             ref={synopsisRef}
+            className="py-1 px-2 border rounded w-full mb-1"
             name="synopsis"
             id="synopsis"
             cols="30"
@@ -227,11 +246,17 @@ function MovieForm({ title, release, synopsis, isEditing }) {
             defaultValue={synopsis}
             disabled={state.status === STATES.loading}
           ></textarea>
-          {state.status === STATES.failed && (
-            <p data-testid="synopsis-error">{state.errors.synopsis}</p>
-          )}
+          <p
+            className={`text-xs text-red-500 ${
+              state.status === STATES.failed ? 'visible' : 'hidden'
+            }`}
+            data-testid="title-error"
+          >
+            {state.status === STATES.failed ? state.errors.synopsis : ''}
+          </p>
         </div>
         <button
+          className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
           type="submit"
           data-testid="submit"
           disabled={state.status === STATES.loading}
@@ -239,8 +264,6 @@ function MovieForm({ title, release, synopsis, isEditing }) {
           {state.status === STATES.loading ? 'Adding' : 'Add'}
         </button>
       </form>
-    </section>
+    </div>
   );
 }
-
-export default MovieForm;
