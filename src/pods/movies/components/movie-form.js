@@ -261,7 +261,7 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
           data-testid="submit"
           disabled={state.status === STATES.loading}
         >
-          {state.status === STATES.loading ? 'Adding' : 'Add'}
+          {state.status === STATES.loading ? 'Submitting...' : 'Submit'}
         </button>
       </form>
     </div>
