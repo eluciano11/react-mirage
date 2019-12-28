@@ -150,7 +150,9 @@ export default function Movie() {
       return (
         <div data-testid="movie-details">
           {state.status === STATES.failed && (
-            <p data-testid="general-error">{state.errors.general}</p>
+            <p className="text-red-500" data-testid="general-error">
+              {state.errors.general}
+            </p>
           )}
           <Modal isOpen={state.status === STATES.confirming}>
             <div>

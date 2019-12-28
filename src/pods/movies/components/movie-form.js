@@ -184,7 +184,9 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
   return (
     <div>
       {state.status === STATES.failed && (
-        <p data-testid="general-error">{state.errors.general}</p>
+        <p className="text-red-500" data-testid="general-error">
+          {state.errors.general}
+        </p>
       )}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -200,14 +202,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             defaultValue={title}
             disabled={state.status === STATES.loading}
           />
-          <p
-            className={`text-xs text-red-500 ${
-              state.status === STATES.failed ? 'visible' : 'hidden'
-            }`}
-            data-testid="title-error"
-          >
-            {state.status === STATES.failed ? state.errors.title : ''}
-          </p>
+          {state.status === STATES.failed && (
+            <p className="text-xs text-red-500" data-testid="title-error">
+              {state.errors.title}
+            </p>
+          )}
         </div>
         <div className="mb-4">
           <label className="block mb-2 font-medium" htmlFor="release">
@@ -222,14 +221,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             defaultValue={release}
             disabled={state.status === STATES.loading}
           />
-          <p
-            className={`text-xs text-red-500 ${
-              state.status === STATES.failed ? 'visible' : 'hidden'
-            }`}
-            data-testid="title-error"
-          >
-            {state.status === STATES.failed ? state.errors.release : ''}
-          </p>
+          {state.status === STATES.failed && (
+            <p className="text-xs text-red-500" data-testid="release-error">
+              {state.errors.release}
+            </p>
+          )}
         </div>
         <div className="mb-4">
           <label className="block mb-2 font-medium" htmlFor="synopsis">
@@ -246,14 +242,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             defaultValue={synopsis}
             disabled={state.status === STATES.loading}
           ></textarea>
-          <p
-            className={`text-xs text-red-500 ${
-              state.status === STATES.failed ? 'visible' : 'hidden'
-            }`}
-            data-testid="title-error"
-          >
-            {state.status === STATES.failed ? state.errors.synopsis : ''}
-          </p>
+          {state.status === STATES.failed && (
+            <p className="text-xs text-red-500" data-testid="synopsis-error">
+              {state.errors.synopsis}
+            </p>
+          )}
         </div>
         <button
           className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
