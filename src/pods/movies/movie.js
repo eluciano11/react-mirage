@@ -35,7 +35,6 @@ const initialState = {
 };
 
 function reducer(state = initialState, action) {
-  debugger;
   switch (state.status) {
     case STATES.idle: {
       switch (action.type) {
@@ -154,24 +153,36 @@ export default function Movie() {
             <p data-testid="general-error">{state.errors.general}</p>
           )}
           <Modal isOpen={state.status === STATES.confirming}>
-            <div>Are you sure you want to close delete this movie?</div>
             <div>
-              <button
-                onClick={handleDelete}
-                data-testid="confirm"
-                disabled={state.status === STATES.loading}
-              >
-                {state.status === STATES.loading
-                  ? 'Deleting...'
-                  : 'Yes, delete'}
-              </button>
-              <button
-                onClick={() => toggleConfirm(EVENTS.canceled)}
-                data-testid="cancel"
-                disabled={state.status === STATES.loading}
-              >
-                Cancel
-              </button>
+              <header className="py-2 px-4 border border-solid border-t-0 border-r-0 border-l-0">
+                <h4 className="text-xl font-semibold">
+                  Are you sure you want to delete this movie?
+                </h4>
+              </header>
+              <p className="py-2 px-4">
+                When you delete a movie you won't be able to add it back to your
+                list.
+              </p>
+              <footer className="py-2 px-4 border border-solid border-b-0 border-r-0 border-l-0 pt-2">
+                <button
+                  className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold mr-2"
+                  onClick={handleDelete}
+                  data-testid="confirm"
+                  disabled={state.status === STATES.loading}
+                >
+                  {state.status === STATES.loading
+                    ? 'Deleting...'
+                    : 'Yes, delete'}
+                </button>
+                <button
+                  className="inline-block px-5 py-3 border border-solid rounded font-semibold"
+                  onClick={() => toggleConfirm(EVENTS.canceled)}
+                  data-testid="cancel"
+                  disabled={state.status === STATES.loading}
+                >
+                  Cancel
+                </button>
+              </footer>
             </div>
           </Modal>
           <h3 className="text-2xl font-semibold mb-2" data-testid="title">

@@ -4,7 +4,12 @@ import { createPortal } from 'react-dom';
 export default function Modal({ children, isOpen }) {
   if (isOpen) {
     return createPortal(
-      <div data-testid="modal">{children}</div>,
+      <div
+        className="fixed top-0 right-0 w-screen h-screen flex items-center justify-center modal__overlay"
+        data-testid="modal"
+      >
+        <div className="bg-white rounded">{children}</div>
+      </div>,
       document.body
     );
   }
