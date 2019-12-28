@@ -128,7 +128,7 @@ export default function Movie() {
 
       dispatch({ type: EVENTS.rejected, errors });
     }
-  }, [history, id, state]);
+  }, [history, id]);
 
   const toggleConfirm = useCallback(action => {
     dispatch({ type: action });
@@ -174,22 +174,31 @@ export default function Movie() {
               </button>
             </div>
           </Modal>
+          <h3 className="text-2xl font-semibold mb-2" data-testid="title">
+            {movie.data.title}{' '}
+            <span data-testid="release">({movie.data.release})</span>
+          </h3>
           <img
-            src={movie.poster}
+            src={movie.data.poster}
             alt="movie poster"
             style={{ height: 300, width: 300 }}
           />
-          <h3 data-testid="title">{movie.data.title}</h3>
-          <p data-testid="release">{movie.data.release}</p>
-          <p data-testid="synopsis">{movie.data.synopsis}</p>
+          <p className="m-2" data-testid="synopsis">
+            {movie.data.synopsis}
+          </p>
           <button
+            className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold mr-2"
             onClick={() => toggleConfirm(EVENTS.delete)}
             data-testid="delete"
             disabled={state.status === STATES.loading}
           >
             Delete
           </button>
-          <Link to={`/${id}/edit`} disabled={state.status === STATES.loading}>
+          <Link
+            className="inline-block px-5 py-3 border border-solid rounded font-semibold"
+            to={`/${id}/edit`}
+            disabled={state.status === STATES.loading}
+          >
             Edit
           </Link>
         </div>
