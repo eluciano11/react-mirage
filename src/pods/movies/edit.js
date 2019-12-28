@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Loader } from '../components/index';
 import { MovieForm } from './components/index';
 import { useMovie } from './hooks/index';
 
@@ -8,11 +9,24 @@ function EditMovie() {
 
   switch (movie.status) {
     case 'LOADING': {
-      return <div>Loading...</div>;
+      return (
+        <div className="w-11/12 m-auto text-center">
+          <Loader />
+        </div>
+      );
     }
 
     case 'FAILED': {
-      return <div>Failed to load movie</div>;
+      return (
+        <div className="w-11/12 m-auto">
+          <p>
+            Failed to load movie{' '}
+            <span role="img" aria-label="sad">
+              😥
+            </span>
+          </p>
+        </div>
+      );
     }
 
     case 'SUCCESS': {

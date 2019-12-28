@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import Pods from './pods/index';
 import { createServer } from './mirage/index';
-import './App.css';
+import './styles/main.css';
 
 createServer();
 
@@ -19,7 +19,7 @@ function App() {
             🤗
           </h2>
         </div>
-        <div className="max-w-6xl m-auto">
+        <div className="max-w-6xl m-auto h-full">
           <Switch>
             <Route path="/" exact>
               <Pods.Movies />

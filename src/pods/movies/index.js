@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 import { Link } from 'react-router-dom';
 
+import { Loader } from '../components/index';
+
 // States that our UI could be in.
 const STATES = {
   idle: 'IDLE',
@@ -92,11 +94,24 @@ export default function Movies() {
 
   switch (state.status) {
     case STATES.loading: {
-      return <div data-testid="loading">Loading...</div>;
+      return (
+        <div className="w-11/12 m-auto" data-testid="loading">
+          <Loader />
+        </div>
+      );
     }
 
     case STATES.failed: {
-      return <div data-testid="error">Sorry, we found an error!</div>;
+      return (
+        <div className="w-11/12 m-auto">
+          <div data-testid="error">
+            Ops! We found an error, please try again.{' '}
+            <span role="img" aria-label="sad">
+              😥
+            </span>
+          </div>
+        </div>
+      );
     }
 
     case STATES.success: {

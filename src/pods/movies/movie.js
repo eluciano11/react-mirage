@@ -1,7 +1,7 @@
 import React, { useCallback, useReducer } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
 
-import { Modal } from '../components/index';
+import { Loader, Modal } from '../components/index';
 import { useMovie } from './hooks/index';
 
 const GENERIC_ERROR = {
@@ -135,20 +135,29 @@ export default function Movie() {
 
   switch (movie.status) {
     case 'LOADING': {
-      return <div>Loading...</div>;
+      return (
+        <div className="w-11/12 m-auto">
+          <Loader />
+        </div>
+      );
     }
 
     case 'FAILED': {
       return (
-        <div data-testid="movie-loading-error">
-          Ops! An error occurred while loading the movie.
+        <div className="w-11/12 m-auto text-center">
+          <p data-testid="movie-loading-error">
+            Ops! An error occurred while loading the movie.
+            <span role="img" aria-label="sad">
+              😥
+            </span>
+          </p>
         </div>
       );
     }
 
     case 'SUCCESS': {
       return (
-        <div data-testid="movie-details">
+        <div className="w-11/12 m-auto" data-testid="movie-details">
           {state.status === STATES.failed && (
             <p className="text-red-500" data-testid="general-error">
               {state.errors.general}

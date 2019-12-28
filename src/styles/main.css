@@ -1,0 +1,32 @@
+.modal__overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.loader__container {
+  height: calc(100vh - 80px);
+}
+
+.loader {
+  position: relative;
+  height: 30px;
+  width: 30px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.05);
+  border-top-color: #48bb78;
+  border-right-color: #48bb78;
+  box-shadow: 0px 0px 1px #48bb78;
+  animation: Spin 1s linear infinite;
+  border-radius: 100%;
+  margin-bottom: 8px;
+}
+
+@keyframes Spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
