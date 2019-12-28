@@ -34,10 +34,10 @@ const initialState = {
   errors: null
 };
 
-function reducer(state = initialState, action) {
+function reducer(state = initialState, events) {
   switch (state.status) {
     case STATES.idle: {
-      switch (action.type) {
+      switch (events.type) {
         case EVENTS.delete: {
           return Object.assign({}, state, {
             status: STATES.confirming,
@@ -53,7 +53,7 @@ function reducer(state = initialState, action) {
 
     case STATES.failed:
     case STATES.confirming: {
-      switch (action.type) {
+      switch (events.type) {
         case EVENTS.canceled: {
           return Object.assign({}, state, {
             status: STATES.idle,
@@ -75,7 +75,7 @@ function reducer(state = initialState, action) {
     }
 
     case STATES.loading: {
-      switch (action.type) {
+      switch (events.type) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
             status: STATES.idle,
@@ -86,7 +86,7 @@ function reducer(state = initialState, action) {
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            errors: action.errors
+            errors: events.errors
           });
         }
 

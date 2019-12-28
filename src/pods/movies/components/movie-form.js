@@ -69,6 +69,7 @@ function validateForm({ fields }) {
   throw new FormValidationError({ errors: result.errors });
 }
 
+// Possible states of our component.
 const STATES = {
   idle: 'IDLE',
   loading: 'LOADING',
@@ -76,6 +77,7 @@ const STATES = {
   completed: 'COMPLETED'
 };
 
+// Events that can trigger transitions on your states.
 const EVENTS = {
   submitted: 'SUBMITTED',
   resolved: 'RESOLVED',
@@ -87,11 +89,12 @@ const initialState = {
   errors: null
 };
 
-function reducer(state = initialState, action) {
+function reducer(state = initialState, event) {
   switch (state.status) {
     case STATES.failed:
     case STATES.idle: {
-      switch (action.type) {
+      // Reduce the scope of what can change my state.
+      switch (event.type) {
         case EVENTS.submitted: {
           return Object.assign({}, state, {
             status: STATES.loading,
@@ -106,7 +109,7 @@ function reducer(state = initialState, action) {
     }
 
     case STATES.loading: {
-      switch (action.type) {
+      switch (event.type) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
             status: STATES.completed,
@@ -117,7 +120,7 @@ function reducer(state = initialState, action) {
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            errors: action.errors
+            errors: event.errors
           });
         }
 

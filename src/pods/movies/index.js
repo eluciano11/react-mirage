@@ -1,12 +1,15 @@
 import React, { useEffect, useReducer } from 'react';
 import { Link } from 'react-router-dom';
 
+// States that our UI could be in.
 const STATES = {
   idle: 'IDLE',
   loading: 'LOADING',
   success: 'SUCCESS',
   failed: 'FAILED'
 };
+
+// Events that will trigger a transition on our state.
 const EVENTS = {
   fetch: 'FETCH',
   resolved: 'RESOLVED',
@@ -18,27 +21,43 @@ const initialState = {
   data: []
 };
 
-function reducer(state = initialState, action) {
-  switch (action.type) {
-    case EVENTS.fetch: {
-      return Object.assign({}, state, {
-        status: STATES.loading,
-        data: []
-      });
+function reducer(state = initialState, events) {
+  switch (state.status) {
+    case STATES.idle: {
+      switch (events.type) {
+        case EVENTS.fetch: {
+          return Object.assign({}, state, {
+            status: STATES.loading,
+            data: []
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
     }
 
-    case EVENTS.resolved: {
-      return Object.assign({}, state, {
-        status: STATES.success,
-        data: action.data
-      });
-    }
+    case STATES.loading: {
+      switch (events.type) {
+        case EVENTS.resolved: {
+          return Object.assign({}, state, {
+            status: STATES.success,
+            data: events.data
+          });
+        }
 
-    case EVENTS.rejected: {
-      return Object.assign({}, state, {
-        status: STATES.failed,
-        data: []
-      });
+        case EVENTS.rejected: {
+          return Object.assign({}, state, {
+            status: STATES.failed,
+            data: []
+          });
+        }
+
+        default: {
+          return state;
+        }
+      }
     }
 
     default: {
