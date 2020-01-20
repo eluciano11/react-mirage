@@ -2,10 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 import Pods from './pods/index';
-import { createServer } from './mirage/index';
 import './styles/main.css';
-
-createServer();
 
 function App() {
   return (

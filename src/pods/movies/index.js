@@ -123,11 +123,13 @@ export default function Movies() {
               <Link
                 className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
                 to="/add"
+                data-testid="add-movie"
+                id="add-movie"
               >
                 Add a movie
               </Link>
             </div>
-            <ul className="my-2 overflow-y">
+            <ul className="my-2 overflow-y" data-testid="movies">
               {state.data.map((movie, index) => (
                 <li
                   className={`border border-solid border-gray-200 border-r-0 border-l-0 ${

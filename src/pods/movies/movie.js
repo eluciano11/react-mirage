@@ -220,6 +220,7 @@ export default function Movie() {
             className="inline-block px-5 py-3 border border-solid rounded font-semibold"
             to={`/${id}/edit`}
             disabled={state.status === STATES.loading}
+            data-testid="edit"
           >
             Edit
           </Link>

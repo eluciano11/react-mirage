@@ -23,3 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 src/styles/index.css
+
+cypress/videos
+cypress/screenshots
