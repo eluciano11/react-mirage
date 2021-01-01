@@ -1,4 +1,5 @@
 import { all, call, put, takeLatest } from "redux-saga/effects";
+import { push } from "connected-react-router";
 
 import MovieResource from "../../resource";
 import { MOVIE_EDIT_EVENTS, MOVIE_EVENTS } from "../constants";
@@ -26,7 +27,7 @@ function* createMovieHadler({ cleanData }) {
     yield call(MovieResource.createMovie, cleanData);
 
     yield put({ type: MOVIE_EDIT_EVENTS.resolved });
-    // history.push("/");
+    yield put(push("/"));
   } catch (error) {
     const errors = GENERIC_ERROR;
 
@@ -41,7 +42,7 @@ function* updateMovieHandler({ id, cleanData }) {
     yield call(MovieResource.updateMovie, id, cleanData);
 
     yield put({ type: MOVIE_EDIT_EVENTS.resolved });
-    // history.push("/");
+    yield put(push("/"));
   } catch (error) {
     const errors = GENERIC_ERROR;
 

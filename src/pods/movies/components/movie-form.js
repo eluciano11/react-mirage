@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { MOVIE_EDIT_EVENTS, MOVIE_EDIT_STATES } from "../redux/constants";
 
@@ -71,7 +71,6 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
   const releaseRef = useRef(release || null);
   const synopsisRef = useRef(synopsis || null);
   const { id } = useParams();
-  const history = useHistory();
   const dispatch = useDispatch();
   const state = useSelector((state) => {
     return {
