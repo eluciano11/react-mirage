@@ -1,99 +1,24 @@
-import React, { useEffect, useReducer } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
-import { Loader } from '../components/index';
-
-// States that our UI could be in.
-const STATES = {
-  idle: 'IDLE',
-  loading: 'LOADING',
-  success: 'SUCCESS',
-  failed: 'FAILED'
-};
-
-// Events that will trigger a transition on our state.
-const EVENTS = {
-  fetch: 'FETCH',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
-};
-
-const initialState = {
-  status: STATES.idle,
-  data: []
-};
-
-function reducer(state = initialState, events) {
-  switch (state.status) {
-    case STATES.idle: {
-      switch (events.type) {
-        case EVENTS.fetch: {
-          return Object.assign({}, state, {
-            status: STATES.loading,
-            data: []
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    case STATES.loading: {
-      switch (events.type) {
-        case EVENTS.resolved: {
-          return Object.assign({}, state, {
-            status: STATES.success,
-            data: events.data
-          });
-        }
-
-        case EVENTS.rejected: {
-          return Object.assign({}, state, {
-            status: STATES.failed,
-            data: []
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    default: {
-      return state;
-    }
-  }
-}
+import { Loader } from "../components/index";
+import { MOVIES_LIST_STATES, MOVIES_LIST_EVENTS } from "./redux/constants";
 
 export default function Movies() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const dispatch = useDispatch();
+  const state = useSelector((state) => {
+    return {
+      ...state.list,
+    };
+  });
 
   useEffect(() => {
-    const getMovies = async () => {
-      try {
-        const res = await fetch('/movies');
-
-        if (res.status >= 400) {
-          throw res;
-        }
-
-        const { movies } = await res.json();
-
-        return dispatch({ type: EVENTS.resolved, data: movies });
-      } catch (error) {
-        return dispatch({ type: EVENTS.rejected });
-      }
-    };
-
-    dispatch({ type: EVENTS.fetch });
-    getMovies();
-  }, []);
+    dispatch({ type: MOVIES_LIST_EVENTS.fetch });
+  }, [dispatch]);
 
   switch (state.status) {
-    case STATES.loading: {
+    case MOVIES_LIST_STATES.loading: {
       return (
         <div className="w-11/12 m-auto" data-testid="loading">
           <Loader />
@@ -101,11 +26,11 @@ export default function Movies() {
       );
     }
 
-    case STATES.failed: {
+    case MOVIES_LIST_STATES.failed: {
       return (
         <div className="w-11/12 m-auto">
           <div data-testid="error">
-            Ops! We found an error, please try again.{' '}
+            Ops! We found an error, please try again.{" "}
             <span role="img" aria-label="sad">
               😥
             </span>
@@ -114,7 +39,7 @@ export default function Movies() {
       );
     }
 
-    case STATES.success: {
+    case MOVIES_LIST_STATES.success: {
       if (state.data.length > 0) {
         return (
           <section className="w-11/12 m-auto" data-testid="list">
@@ -133,7 +58,7 @@ export default function Movies() {
               {state.data.map((movie, index) => (
                 <li
                   className={`border border-solid border-gray-200 border-r-0 border-l-0 ${
-                    index + 1 !== state.data.length ? 'border-b-0' : ''
+                    index + 1 !== state.data.length ? "border-b-0" : ""
                   }`}
                   key={index}
                   data-testid="movie"
