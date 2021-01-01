@@ -26,3 +26,20 @@ export const MOVIE_EVENTS = {
   resolved: "movie/RESOLVED",
   rejected: "movie/REJECTED",
 };
+
+// Possible states of our component.
+export const MOVIE_EDIT_STATES = {
+  idle: "IDLE",
+  loading: "LOADING",
+  failed: "FAILED",
+  completed: "COMPLETED",
+};
+
+// Events that can trigger transitions on your states.
+export const MOVIE_EDIT_EVENTS = {
+  create: "movie-edit/CREATE",
+  update: "movie-edit/UPDATE",
+  submitted: "movie-edit/SUBMITTED",
+  resolved: "movie-edit/RESOLVED",
+  rejected: "movie-edit/REJECTED",
+};

@@ -1,4 +1,4 @@
 import { MoviesListReducer } from "./movies-list";
-import { MovieReducer } from "./movie";
+import { MovieReducer, MovieEditReducer } from "./movie";
 
-export { MovieReducer, MoviesListReducer };
+export { MovieReducer, MovieEditReducer, MoviesListReducer };

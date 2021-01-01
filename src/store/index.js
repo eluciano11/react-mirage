@@ -8,6 +8,7 @@ import * as MoviesSagas from "../pods/movies/redux/sagas";
 const reducers = combineReducers({
   list: MoviesReducers.MoviesListReducer,
   movie: MoviesReducers.MovieReducer,
+  edit: MoviesReducers.MovieEditReducer,
 });
 
 // Middlewares

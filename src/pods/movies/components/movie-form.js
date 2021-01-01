@@ -1,19 +1,16 @@
-import React, { useCallback, useRef, useReducer } from 'react';
+import React, { useCallback, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useHistory } from "react-router-dom";
 
-import { useParams, useHistory } from 'react-router-dom';
+import { MOVIE_EDIT_EVENTS, MOVIE_EDIT_STATES } from "../redux/constants";
 
 const GENERIC_ERROR = {
-  general: 'Ops! Something went wrong, please try again!'
+  general: "Ops! Something went wrong, please try again!",
 };
 
 function FormValidationError({ errors }) {
-  this.type = 'FormValidationError';
+  this.type = "FormValidationError";
   this.errors = errors;
-}
-
-function NetworkError({ res, data }) {
-  this.type = res.status === 422 ? 'FormValidationError' : 'UnhandledError';
-  this.errors = data.errors;
 }
 
 function hasContent({ field }) {
@@ -21,14 +18,14 @@ function hasContent({ field }) {
     return {
       isValid: true,
       cleanData: field,
-      error: null
+      error: null,
     };
   }
 
   return {
     isValid: false,
     cleanData: null,
-    error: 'This field is required.'
+    error: "This field is required.",
   };
 }
 
@@ -46,8 +43,8 @@ function validateForm({ fields }) {
           ...prev,
           errors: {
             ...prev.errors,
-            [current]: entry.error
-          }
+            [current]: entry.error,
+          },
         };
       }
 
@@ -55,8 +52,8 @@ function validateForm({ fields }) {
         ...prev,
         cleanData: {
           ...prev.cleanData,
-          [current]: entry.cleanData
-        }
+          [current]: entry.cleanData,
+        },
       };
     },
     { cleanData: {}, errors: {} }
@@ -69,124 +66,49 @@ function validateForm({ fields }) {
   throw new FormValidationError({ errors: result.errors });
 }
 
-// Possible states of our component.
-const STATES = {
-  idle: 'IDLE',
-  loading: 'LOADING',
-  failed: 'FAILED',
-  completed: 'COMPLETED'
-};
-
-// Events that can trigger transitions on your states.
-const EVENTS = {
-  submitted: 'SUBMITTED',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
-};
-
-const initialState = {
-  status: STATES.idle,
-  errors: null
-};
-
-function reducer(state = initialState, event) {
-  switch (state.status) {
-    case STATES.failed:
-    case STATES.idle: {
-      // Reduce the scope of what can change my state.
-      switch (event.type) {
-        case EVENTS.submitted: {
-          return Object.assign({}, state, {
-            status: STATES.loading,
-            errors: null
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    case STATES.loading: {
-      switch (event.type) {
-        case EVENTS.resolved: {
-          return Object.assign({}, state, {
-            status: STATES.completed,
-            errors: null
-          });
-        }
-
-        case EVENTS.rejected: {
-          return Object.assign({}, state, {
-            status: STATES.failed,
-            errors: event.errors
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    default: {
-      return state;
-    }
-  }
-}
-
 export default function MovieForm({ title, release, synopsis, isEditing }) {
   const titleRef = useRef(title || null);
   const releaseRef = useRef(release || null);
   const synopsisRef = useRef(synopsis || null);
   const { id } = useParams();
   const history = useHistory();
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const dispatch = useDispatch();
+  const state = useSelector((state) => {
+    return {
+      ...state.edit,
+    };
+  });
 
   const handleSubmit = useCallback(
-    async event => {
+    async (event) => {
       event.preventDefault();
-
-      dispatch({ type: EVENTS.submitted });
 
       try {
         const fields = {
           title: hasContent({ field: titleRef.current.value }),
           release: hasContent({ field: releaseRef.current.value }),
-          synopsis: hasContent({ field: synopsisRef.current.value })
+          synopsis: hasContent({ field: synopsisRef.current.value }),
         };
         const { cleanData } = validateForm({ fields });
-        const endpoint = isEditing ? `/movies/${id}/` : '/movies';
-        const method = isEditing ? 'PATCH' : 'POST';
 
-        const res = await fetch(endpoint, {
-          method,
-          body: JSON.stringify({
-            data: { type: 'movies', attributes: cleanData }
-          })
-        });
-        const data = await res.json();
-
-        if (res.status >= 200 && res.status <= 299) {
-          dispatch({ type: EVENTS.resolved });
-          history.push('/');
+        if (isEditing) {
+          dispatch({ type: MOVIE_EDIT_EVENTS.update, cleanData, id });
         } else {
-          throw new NetworkError({ res, data });
+          dispatch({ type: MOVIE_EDIT_EVENTS.create, cleanData });
         }
       } catch (error) {
         const errors =
-          error.type === 'FormValidationError' ? error.errors : GENERIC_ERROR;
+          error.type === "FormValidationError" ? error.errors : GENERIC_ERROR;
 
-        dispatch({ type: EVENTS.rejected, errors });
+        dispatch({ type: MOVIE_EDIT_EVENTS.rejected, errors });
       }
     },
-    [history, id, isEditing]
+    [id, isEditing, dispatch]
   );
 
   return (
     <div>
-      {state.status === STATES.failed && (
+      {state.status === MOVIE_EDIT_STATES.failed && (
         <p className="text-red-500" data-testid="general-error">
           {state.errors.general}
         </p>
@@ -203,9 +125,9 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="title"
             defaultValue={title}
-            disabled={state.status === STATES.loading}
+            disabled={state.status === MOVIE_EDIT_STATES.loading}
           />
-          {state.status === STATES.failed && (
+          {state.status === MOVIE_EDIT_STATES.failed && (
             <p className="text-xs text-red-500" data-testid="title-error">
               {state.errors.title}
             </p>
@@ -222,9 +144,9 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="release"
             defaultValue={release}
-            disabled={state.status === STATES.loading}
+            disabled={state.status === MOVIE_EDIT_STATES.loading}
           />
-          {state.status === STATES.failed && (
+          {state.status === MOVIE_EDIT_STATES.failed && (
             <p className="text-xs text-red-500" data-testid="release-error">
               {state.errors.release}
             </p>
@@ -243,9 +165,9 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             rows="10"
             data-testid="synopsis"
             defaultValue={synopsis}
-            disabled={state.status === STATES.loading}
+            disabled={state.status === MOVIE_EDIT_STATES.loading}
           ></textarea>
-          {state.status === STATES.failed && (
+          {state.status === MOVIE_EDIT_STATES.failed && (
             <p className="text-xs text-red-500" data-testid="synopsis-error">
               {state.errors.synopsis}
             </p>
@@ -255,9 +177,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
           className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
           type="submit"
           data-testid="submit"
-          disabled={state.status === STATES.loading}
+          disabled={state.status === MOVIE_EDIT_STATES.loading}
         >
-          {state.status === STATES.loading ? 'Submitting...' : 'Submit'}
+          {state.status === MOVIE_EDIT_STATES.loading
+            ? "Submitting..."
+            : "Submit"}
         </button>
       </form>
     </div>
