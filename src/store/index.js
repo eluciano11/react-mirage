@@ -7,6 +7,7 @@ import * as MoviesSagas from "../pods/movies/redux/sagas";
 // Reducers
 const reducers = combineReducers({
   list: MoviesReducers.MoviesListReducer,
+  movie: MoviesReducers.MovieReducer,
 });
 
 // Middlewares
@@ -16,5 +17,6 @@ const sagaMiddleware = createSagaMiddleware();
 const store = createStore(reducers, applyMiddleware(sagaMiddleware));
 
 sagaMiddleware.run(MoviesSagas.MoviesListSaga);
+sagaMiddleware.run(MoviesSagas.MovieSaga);
 
 export default store;

@@ -1,3 +1,4 @@
-import { MoviesListReducer } from "./movies-list.js";
+import { MoviesListReducer } from "./movies-list";
+import { MovieReducer } from "./movie";
 
-export { MoviesListReducer };
+export { MovieReducer, MoviesListReducer };
