@@ -7,14 +7,14 @@ import { MOVIES_LIST_STATES, MOVIES_LIST_EVENTS } from "./redux/constants";
 
 export default function Movies() {
   const dispatch = useDispatch();
-  const state = useSelector((state) => {
-    return {
-      ...state.list,
-    };
-  });
+  const state = useSelector((state) => state.list);
 
   useEffect(() => {
     dispatch({ type: MOVIES_LIST_EVENTS.fetch });
+
+    return () => {
+      dispatch({ type: MOVIES_LIST_EVENTS.reset });
+    };
   }, [dispatch]);
 
   switch (state.status) {

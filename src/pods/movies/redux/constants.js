@@ -4,6 +4,7 @@ export const MOVIES_LIST_EVENTS = {
   fetching: "movies-list/FETCHING",
   resolved: "movies-list/RESOLVED",
   rejected: "movies-list/REJECTED",
+  reset: "movies-list/RESET",
 };
 
 export const MOVIES_LIST_STATES = {

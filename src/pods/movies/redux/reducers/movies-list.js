@@ -6,7 +6,9 @@ const initialState = {
 };
 
 export function MoviesListReducer(state = initialState, events) {
-  console.log({ state, events });
+  if (events.type === MOVIES_LIST_EVENTS.reset) {
+    return initialState;
+  }
 
   switch (state.status) {
     case MOVIES_LIST_STATES.idle: {

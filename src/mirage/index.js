@@ -1,10 +1,10 @@
-import { Server, Model } from '@miragejs/server';
+import { Server, Model } from "@miragejs/server";
 
-import Factories from './factories/index';
+import Factories from "./factories/index";
 
 export function createServer({
-  environment = 'development',
-  trackRequests = false
+  environment = "development",
+  trackRequests = false,
 } = {}) {
   return new Server({
     environment,
@@ -12,21 +12,21 @@ export function createServer({
     trackRequests,
 
     models: {
-      movie: Model
+      movie: Model,
     },
 
     factories: Factories,
 
     seeds(server) {
-      server.createList('movie', 10);
+      server.createList("movie", 10);
     },
 
     routes() {
-      this.get('/movies');
-      this.post('/movies');
-      this.get('/movies/:id');
-      this.delete('/movies/:id');
-      this.patch('/movies/:id');
-    }
+      this.get("/movies");
+      this.post("/movies");
+      this.get("/movies/:id");
+      this.delete("/movies/:id");
+      this.patch("/movies/:id");
+    },
   });
 }
