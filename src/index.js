@@ -2,13 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Server, Response } from "@miragejs/server";
 import { Provider } from "react-redux";
-import { ConnectedRouter } from "connected-react-router";
 
 import App from "./App";
 import "./styles/index.css";
 import * as serviceWorker from "./serviceWorker";
 import { createServer } from "./mirage/index";
-import store, { history } from "./store/index";
+import store from "./store/index";
 
 // For development
 if (process.env.NODE_ENV === "development" && !window.Cypress) {
@@ -33,9 +32,7 @@ if (window.Cypress) {
 
 ReactDOM.render(
   <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <App />
-    </ConnectedRouter>
+    <App />
   </Provider>,
   document.getElementById("root")
 );

@@ -1,28 +1,20 @@
-import { createStore, combineReducers, applyMiddleware } from "redux";
+import { createStore, applyMiddleware } from "redux";
 import createSagaMiddleware from "redux-saga";
-import { connectRouter, routerMiddleware } from "connected-react-router";
+import { routerMiddleware } from "connected-react-router";
 import { createBrowserHistory } from "history";
 import logger from "redux-logger";
 
-import * as MoviesReducers from "../pods/movies/redux/reducers";
 import * as MoviesSagas from "../pods/movies/redux/sagas";
+import createRootReducer from "./create-root-reducer";
 
 export const history = createBrowserHistory();
-
-// Reducers
-const reducers = combineReducers({
-  router: connectRouter(history),
-  list: MoviesReducers.MoviesListReducer,
-  movie: MoviesReducers.MovieReducer,
-  edit: MoviesReducers.MovieEditReducer,
-});
 
 // Middlewares
 const sagaMiddleware = createSagaMiddleware();
 
 // Store
 const store = createStore(
-  reducers,
+  createRootReducer(history),
   applyMiddleware(logger, routerMiddleware(history), sagaMiddleware)
 );
 
