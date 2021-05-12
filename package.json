@@ -59,6 +59,7 @@
     "eslint-plugin-react": "7.x",
     "eslint-plugin-react-hooks": "1.x",
     "faker": "^4.1.0",
+    "miragejs": "^0.1.41",
     "postcss": "^7.0.25",
     "start-server-and-test": "^1.10.6",
     "tailwindcss": "^1.1.4"

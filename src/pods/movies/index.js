@@ -1,26 +1,27 @@
-import React, { useEffect, useReducer } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useReducer } from "react";
+import { Link } from "react-router-dom";
 
-import { Loader } from '../components/index';
+import { Loader } from "../components/index";
+import MoviesResource from "./resource";
 
 // States that our UI could be in.
 const STATES = {
-  idle: 'IDLE',
-  loading: 'LOADING',
-  success: 'SUCCESS',
-  failed: 'FAILED'
+  idle: "IDLE",
+  loading: "LOADING",
+  success: "SUCCESS",
+  failed: "FAILED",
 };
 
 // Events that will trigger a transition on our state.
 const EVENTS = {
-  fetch: 'FETCH',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
+  fetch: "FETCH",
+  resolved: "RESOLVED",
+  rejected: "REJECTED",
 };
 
 const initialState = {
   status: STATES.idle,
-  data: []
+  data: [],
 };
 
 function reducer(state = initialState, events) {
@@ -30,7 +31,7 @@ function reducer(state = initialState, events) {
         case EVENTS.fetch: {
           return Object.assign({}, state, {
             status: STATES.loading,
-            data: []
+            data: [],
           });
         }
 
@@ -45,14 +46,14 @@ function reducer(state = initialState, events) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
             status: STATES.success,
-            data: events.data
+            data: events.data,
           });
         }
 
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            data: []
+            data: [],
           });
         }
 
@@ -74,13 +75,7 @@ export default function Movies() {
   useEffect(() => {
     const getMovies = async () => {
       try {
-        const res = await fetch('/movies');
-
-        if (res.status >= 400) {
-          throw res;
-        }
-
-        const { movies } = await res.json();
+        const { movies } = await MoviesResource.getAllMovies();
 
         return dispatch({ type: EVENTS.resolved, data: movies });
       } catch (error) {
@@ -105,7 +100,7 @@ export default function Movies() {
       return (
         <div className="w-11/12 m-auto">
           <div data-testid="error">
-            Ops! We found an error, please try again.{' '}
+            Ops! We found an error, please try again.{" "}
             <span role="img" aria-label="sad">
               😥
             </span>
@@ -133,7 +128,7 @@ export default function Movies() {
               {state.data.map((movie, index) => (
                 <li
                   className={`border border-solid border-gray-200 border-r-0 border-l-0 ${
-                    index + 1 !== state.data.length ? 'border-b-0' : ''
+                    index + 1 !== state.data.length ? "border-b-0" : ""
                   }`}
                   key={index}
                   data-testid="movie"
