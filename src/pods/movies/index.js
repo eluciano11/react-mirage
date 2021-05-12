@@ -1,8 +1,9 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { observer } from "mobx-react-lite";
 
 import { Loader } from "../components/index";
-import MoviesResource from "./resource";
+import { useRootStore } from "../../context/root";
 
 // States that our UI could be in.
 const STATES = {
@@ -12,82 +13,17 @@ const STATES = {
   failed: "FAILED",
 };
 
-// Events that will trigger a transition on our state.
-const EVENTS = {
-  fetch: "FETCH",
-  resolved: "RESOLVED",
-  rejected: "REJECTED",
-};
-
-const initialState = {
-  status: STATES.idle,
-  data: [],
-};
-
-function reducer(state = initialState, events) {
-  switch (state.status) {
-    case STATES.idle: {
-      switch (events.type) {
-        case EVENTS.fetch: {
-          return Object.assign({}, state, {
-            status: STATES.loading,
-            data: [],
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    case STATES.loading: {
-      switch (events.type) {
-        case EVENTS.resolved: {
-          return Object.assign({}, state, {
-            status: STATES.success,
-            data: events.data,
-          });
-        }
-
-        case EVENTS.rejected: {
-          return Object.assign({}, state, {
-            status: STATES.failed,
-            data: [],
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    default: {
-      return state;
-    }
-  }
-}
-
-export default function Movies() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+const Movies = observer(() => {
+  const store = useRootStore();
+  console.log({ status: store.movieStore.status });
 
   useEffect(() => {
-    const getMovies = async () => {
-      try {
-        const { movies } = await MoviesResource.getAllMovies();
-
-        return dispatch({ type: EVENTS.resolved, data: movies });
-      } catch (error) {
-        return dispatch({ type: EVENTS.rejected });
-      }
-    };
-
-    dispatch({ type: EVENTS.fetch });
-    getMovies();
+    store.movieStore.fetchMovies();
   }, []);
 
-  switch (state.status) {
+  console.log({ status: store.movieStore.status });
+
+  switch (store.movieStore.status) {
     case STATES.loading: {
       return (
         <div className="w-11/12 m-auto" data-testid="loading">
@@ -110,7 +46,7 @@ export default function Movies() {
     }
 
     case STATES.success: {
-      if (state.data.length > 0) {
+      if (store.movieStore.movies.length > 0) {
         return (
           <section className="w-11/12 m-auto" data-testid="list">
             <div className="flex justify-between items-center m-2">
@@ -125,22 +61,28 @@ export default function Movies() {
               </Link>
             </div>
             <ul className="my-2 overflow-y" data-testid="movies">
-              {state.data.map((movie, index) => (
-                <li
-                  className={`border border-solid border-gray-200 border-r-0 border-l-0 ${
-                    index + 1 !== state.data.length ? "border-b-0" : ""
-                  }`}
-                  key={index}
-                  data-testid="movie"
-                >
-                  <Link
-                    className="block text-lg py-2 px-4 hover:bg-gray-100"
-                    to={`/${movie.id}`}
+              {store.movieStore.movies.map((movie, index) => {
+                console.log({ movie });
+
+                return (
+                  <li
+                    className={`border border-solid border-gray-200 border-r-0 border-l-0 ${
+                      index + 1 !== store.movieStore.movies.length
+                        ? "border-b-0"
+                        : ""
+                    }`}
+                    key={index}
+                    data-testid="movie"
                   >
-                    {movie.title} {movie.release}
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      className="block text-lg py-2 px-4 hover:bg-gray-100"
+                      to={`/${movie.id}`}
+                    >
+                      {movie.title} {movie.release}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         );
@@ -153,4 +95,6 @@ export default function Movies() {
       return null;
     }
   }
-}
+});
+
+export default Movies;

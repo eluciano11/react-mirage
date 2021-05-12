@@ -1,10 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { observer } from "mobx-react-lite";
 
-import Pods from './pods/index';
-import './styles/main.css';
+import Pods from "./pods/index";
+import "./styles/main.css";
 
-function App() {
+const App = observer(() => {
   return (
     <div className="w-full">
       <Router>
@@ -12,7 +13,7 @@ function App() {
           <h2 className="text-4xl py-2 mb-2 bg-green-500">
             <Link className="text-white" to="/">
               React Mirage
-            </Link>{' '}
+            </Link>{" "}
             🤗
           </h2>
         </div>
@@ -36,6 +37,6 @@ function App() {
       </Router>
     </div>
   );
-}
+});
 
 export default App;
