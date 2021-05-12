@@ -1,19 +1,15 @@
-import React, { useCallback, useRef, useReducer } from 'react';
+import React, { useCallback, useRef, useReducer } from "react";
 
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from "react-router-dom";
+import MoviesResource from "../resource";
 
 const GENERIC_ERROR = {
-  general: 'Ops! Something went wrong, please try again!'
+  general: "Ops! Something went wrong, please try again!",
 };
 
 function FormValidationError({ errors }) {
-  this.type = 'FormValidationError';
+  this.type = "FormValidationError";
   this.errors = errors;
-}
-
-function NetworkError({ res, data }) {
-  this.type = res.status === 422 ? 'FormValidationError' : 'UnhandledError';
-  this.errors = data.errors;
 }
 
 function hasContent({ field }) {
@@ -21,14 +17,14 @@ function hasContent({ field }) {
     return {
       isValid: true,
       cleanData: field,
-      error: null
+      error: null,
     };
   }
 
   return {
     isValid: false,
     cleanData: null,
-    error: 'This field is required.'
+    error: "This field is required.",
   };
 }
 
@@ -46,8 +42,8 @@ function validateForm({ fields }) {
           ...prev,
           errors: {
             ...prev.errors,
-            [current]: entry.error
-          }
+            [current]: entry.error,
+          },
         };
       }
 
@@ -55,8 +51,8 @@ function validateForm({ fields }) {
         ...prev,
         cleanData: {
           ...prev.cleanData,
-          [current]: entry.cleanData
-        }
+          [current]: entry.cleanData,
+        },
       };
     },
     { cleanData: {}, errors: {} }
@@ -71,22 +67,22 @@ function validateForm({ fields }) {
 
 // Possible states of our component.
 const STATES = {
-  idle: 'IDLE',
-  loading: 'LOADING',
-  failed: 'FAILED',
-  completed: 'COMPLETED'
+  idle: "IDLE",
+  loading: "LOADING",
+  failed: "FAILED",
+  completed: "COMPLETED",
 };
 
 // Events that can trigger transitions on your states.
 const EVENTS = {
-  submitted: 'SUBMITTED',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
+  submitted: "SUBMITTED",
+  resolved: "RESOLVED",
+  rejected: "REJECTED",
 };
 
 const initialState = {
   status: STATES.idle,
-  errors: null
+  errors: null,
 };
 
 function reducer(state = initialState, event) {
@@ -98,7 +94,7 @@ function reducer(state = initialState, event) {
         case EVENTS.submitted: {
           return Object.assign({}, state, {
             status: STATES.loading,
-            errors: null
+            errors: null,
           });
         }
 
@@ -113,14 +109,14 @@ function reducer(state = initialState, event) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
             status: STATES.completed,
-            errors: null
+            errors: null,
           });
         }
 
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            errors: event.errors
+            errors: event.errors,
           });
         }
 
@@ -145,7 +141,7 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleSubmit = useCallback(
-    async event => {
+    async (event) => {
       event.preventDefault();
 
       dispatch({ type: EVENTS.submitted });
@@ -154,29 +150,31 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
         const fields = {
           title: hasContent({ field: titleRef.current.value }),
           release: hasContent({ field: releaseRef.current.value }),
-          synopsis: hasContent({ field: synopsisRef.current.value })
+          synopsis: hasContent({ field: synopsisRef.current.value }),
         };
         const { cleanData } = validateForm({ fields });
-        const endpoint = isEditing ? `/movies/${id}/` : '/movies';
-        const method = isEditing ? 'PATCH' : 'POST';
 
-        const res = await fetch(endpoint, {
-          method,
-          body: JSON.stringify({
-            data: { type: 'movies', attributes: cleanData }
-          })
-        });
-        const data = await res.json();
-
-        if (res.status >= 200 && res.status <= 299) {
-          dispatch({ type: EVENTS.resolved });
-          history.push('/');
+        if (isEditing) {
+          await MoviesResource.updateMovie(id, {
+            data: {
+              type: "movies",
+              attributes: cleanData,
+            },
+          });
         } else {
-          throw new NetworkError({ res, data });
+          await MoviesResource.createMovie({
+            data: {
+              type: "movies",
+              attributes: cleanData,
+            },
+          });
         }
+
+        dispatch({ type: EVENTS.resolved });
+        history.push("/");
       } catch (error) {
         const errors =
-          error.type === 'FormValidationError' ? error.errors : GENERIC_ERROR;
+          error.type === "FormValidationError" ? error.errors : GENERIC_ERROR;
 
         dispatch({ type: EVENTS.rejected, errors });
       }
@@ -257,7 +255,7 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
           data-testid="submit"
           disabled={state.status === STATES.loading}
         >
-          {state.status === STATES.loading ? 'Submitting...' : 'Submit'}
+          {state.status === STATES.loading ? "Submitting..." : "Submit"}
         </button>
       </form>
     </div>

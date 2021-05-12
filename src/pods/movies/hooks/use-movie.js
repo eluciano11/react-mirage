@@ -1,28 +1,25 @@
-import { useEffect, useReducer } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useReducer } from "react";
+import { useParams } from "react-router-dom";
 
-function NetworkError({ res, data }) {
-  this.type = res.status === 403 ? 'ForbiddenError' : 'UnhandledError';
-  this.errors = data.errors || {};
-}
+import MoviesResource from "../resource";
 
 const STATES = {
-  idle: 'IDLE',
-  loading: 'LOADING',
-  failed: 'FAILED',
-  success: 'SUCCESS'
+  idle: "IDLE",
+  loading: "LOADING",
+  failed: "FAILED",
+  success: "SUCCESS",
 };
 
 const EVENTS = {
-  fetch: 'FETCH',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
+  fetch: "FETCH",
+  resolved: "RESOLVED",
+  rejected: "REJECTED",
 };
 
 const initialState = {
   status: STATES.idle,
   data: {},
-  errors: null
+  errors: null,
 };
 
 function reducer(state = initialState, action) {
@@ -32,7 +29,7 @@ function reducer(state = initialState, action) {
         case EVENTS.fetch: {
           return Object.assign({}, state, {
             status: STATES.loading,
-            errors: null
+            errors: null,
           });
         }
 
@@ -48,7 +45,7 @@ function reducer(state = initialState, action) {
           return Object.assign({}, state, {
             status: STATES.success,
             data: action.data,
-            errors: null
+            errors: null,
           });
         }
 
@@ -56,7 +53,7 @@ function reducer(state = initialState, action) {
           return Object.assign({}, state, {
             status: STATES.failed,
             data: {},
-            errors: action.errors
+            errors: action.errors,
           });
         }
 
@@ -79,14 +76,9 @@ function useMovie() {
   useEffect(() => {
     const getMovie = async () => {
       try {
-        const res = await fetch(`/movies/${id}`);
-        const data = await res.json();
+        const data = await MoviesResource.getMovie(id);
 
-        if (res.status >= 200 && res.status <= 299) {
-          dispatch({ type: EVENTS.resolved, data: data.movie });
-        } else {
-          throw new NetworkError({ res, data });
-        }
+        dispatch({ type: EVENTS.resolved, data: data.movie });
       } catch (error) {
         dispatch({ type: EVENTS.rejected, errors: error.errors });
       }

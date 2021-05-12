@@ -1,37 +1,33 @@
-import React, { useCallback, useReducer } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import React, { useCallback, useReducer } from "react";
+import { Link, useParams, useHistory } from "react-router-dom";
 
-import { Loader, Modal } from '../components/index';
-import { useMovie } from './hooks/index';
+import { Loader, Modal } from "../components/index";
+import { useMovie } from "./hooks/index";
+import MoviesResource from "./resource";
 
 const GENERIC_ERROR = {
   general:
-    'Ops! Something went wrong while deleting your movie, please try again!'
+    "Ops! Something went wrong while deleting your movie, please try again!",
 };
 
-function NetworkError({ res, data }) {
-  this.type = res.status === 403 ? 'ForbiddenError' : 'UnhandledError';
-  this.errors = data.errors;
-}
-
 const STATES = {
-  idle: 'IDLE',
-  confirming: 'CONFIRMING',
-  loading: 'LOADING',
-  failed: 'FAILED'
+  idle: "IDLE",
+  confirming: "CONFIRMING",
+  loading: "LOADING",
+  failed: "FAILED",
 };
 
 const EVENTS = {
-  delete: 'DELETE',
-  confirmed: 'CONFIRMED',
-  canceled: 'CANCELED',
-  resolved: 'RESOLVED',
-  rejected: 'REJECTED'
+  delete: "DELETE",
+  confirmed: "CONFIRMED",
+  canceled: "CANCELED",
+  resolved: "RESOLVED",
+  rejected: "REJECTED",
 };
 
 const initialState = {
   status: STATES.idle,
-  errors: null
+  errors: null,
 };
 
 function reducer(state = initialState, events) {
@@ -41,7 +37,7 @@ function reducer(state = initialState, events) {
         case EVENTS.delete: {
           return Object.assign({}, state, {
             status: STATES.confirming,
-            errors: null
+            errors: null,
           });
         }
 
@@ -57,14 +53,14 @@ function reducer(state = initialState, events) {
         case EVENTS.canceled: {
           return Object.assign({}, state, {
             status: STATES.idle,
-            errors: null
+            errors: null,
           });
         }
 
         case EVENTS.confirmed: {
           return Object.assign({}, state, {
             status: STATES.loading,
-            errors: null
+            errors: null,
           });
         }
 
@@ -79,14 +75,14 @@ function reducer(state = initialState, events) {
         case EVENTS.resolved: {
           return Object.assign({}, state, {
             status: STATES.idle,
-            errors: null
+            errors: null,
           });
         }
 
         case EVENTS.rejected: {
           return Object.assign({}, state, {
             status: STATES.failed,
-            errors: events.errors
+            errors: events.errors,
           });
         }
 
@@ -112,16 +108,9 @@ export default function Movie() {
     dispatch({ type: EVENTS.confirmed });
 
     try {
-      const res = await fetch(`/movies/${id}`, { method: 'DELETE' });
+      await MoviesResource.deleteMovie(id);
 
-      if (res.status >= 200 && res.status <= 299) {
-        dispatch({ type: EVENTS.resolved });
-        history.push('/');
-      } else {
-        const data = await res.json();
-
-        throw new NetworkError({ res, data });
-      }
+      history.push("/");
     } catch (error) {
       let errors = error.errors || GENERIC_ERROR;
 
@@ -129,12 +118,12 @@ export default function Movie() {
     }
   }, [history, id]);
 
-  const toggleConfirm = useCallback(action => {
+  const toggleConfirm = useCallback((action) => {
     dispatch({ type: action });
   }, []);
 
   switch (movie.status) {
-    case 'LOADING': {
+    case "LOADING": {
       return (
         <div className="w-11/12 m-auto">
           <Loader />
@@ -142,7 +131,7 @@ export default function Movie() {
       );
     }
 
-    case 'FAILED': {
+    case "FAILED": {
       return (
         <div className="w-11/12 m-auto text-center">
           <p data-testid="movie-loading-error">
@@ -155,7 +144,7 @@ export default function Movie() {
       );
     }
 
-    case 'SUCCESS': {
+    case "SUCCESS": {
       return (
         <div className="w-11/12 m-auto" data-testid="movie-details">
           {state.status === STATES.failed && (
@@ -182,8 +171,8 @@ export default function Movie() {
                   disabled={state.status === STATES.loading}
                 >
                   {state.status === STATES.loading
-                    ? 'Deleting...'
-                    : 'Yes, delete'}
+                    ? "Deleting..."
+                    : "Yes, delete"}
                 </button>
                 <button
                   className="inline-block px-5 py-3 border border-solid rounded font-semibold"
@@ -197,7 +186,7 @@ export default function Movie() {
             </div>
           </Modal>
           <h3 className="text-2xl font-semibold mb-2" data-testid="title">
-            {movie.data.title}{' '}
+            {movie.data.title}{" "}
             <span data-testid="release">({movie.data.release})</span>
           </h3>
           <img
