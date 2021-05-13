@@ -19,7 +19,10 @@ export default class MovieStore {
     makeObservable(this, {
       movies: observable,
       status: observable,
+      currentMovieId: observable,
       fetchMovies: action,
+      fetchMovie: action,
+      removeMovie: action,
     });
     this.resource = resource;
   }
