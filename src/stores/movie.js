@@ -13,6 +13,7 @@ export default class MovieStore {
   resource;
   movies = [];
   status = STATES.idle;
+  currentMovieId = null;
 
   constructor(resource) {
     makeObservable(this, {
@@ -21,6 +22,18 @@ export default class MovieStore {
       fetchMovies: action,
     });
     this.resource = resource;
+  }
+
+  get currentMovie() {
+    if (this.currentMovieId) {
+      const selectedMovie = this.movies.find(
+        (m) => m.id === this.currentMovieId
+      );
+
+      return selectedMovie || {};
+    }
+
+    return {};
   }
 
   async fetchMovies() {
@@ -38,13 +51,36 @@ export default class MovieStore {
     }
   }
 
+  async fetchMovie(id) {
+    this.currentMovieId = id;
+
+    const hasMovie = this.movies.find((m) => m.id === id);
+
+    if (!hasMovie) {
+      this.status = STATES.loading;
+
+      try {
+        const { movie } = await this.resource.getMovie(id);
+
+        this.updateTodoFromServer(movie);
+        this.status = STATES.success;
+      } catch {
+        this.status = STATES.failed;
+      }
+    } else {
+      this.status = STATES.success;
+    }
+  }
+
+  removeMovie(id) {
+    this.movies = this.movies.filter((movie) => movie.id !== id);
+  }
+
   updateTodoFromServer(json) {
     const foundMovie = this.movies.find((m) => m.id === json.id);
 
     if (!foundMovie) {
       const movie = new Movie(this, json.id);
-
-      console.log({ json });
 
       movie.updateFromJson(json);
       this.movies.push(movie);
@@ -68,6 +104,12 @@ class Movie {
 
     this.store = store;
     this.id = id;
+  }
+
+  async delete() {
+    await this.store.resource.deleteMovie(this.id);
+
+    this.store.removeMovie(this);
   }
 
   updateFromJson(json) {

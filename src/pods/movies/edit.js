@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useEffect } from "react";
+import { observer } from "mobx-react-lite";
+import { useParams } from "react-router";
 
-import { Loader } from '../components/index';
-import { MovieForm } from './components/index';
-import { useMovie } from './hooks/index';
+import { Loader } from "../components/index";
+import { MovieForm } from "./components/index";
+import { useRootStore } from "../../context/root";
 
-function EditMovie() {
-  const movie = useMovie();
+const EditMovie = observer(() => {
+  const store = useRootStore();
+  const { id } = useParams();
 
-  switch (movie.status) {
-    case 'LOADING': {
+  useEffect(() => {
+    store.movieStore.fetchMovie(id);
+  }, [id]);
+
+  switch (store.movieStore.status) {
+    case "LOADING": {
       return (
         <div className="w-11/12 m-auto text-center">
           <Loader />
@@ -16,11 +23,11 @@ function EditMovie() {
       );
     }
 
-    case 'FAILED': {
+    case "FAILED": {
       return (
         <div className="w-11/12 m-auto">
           <p>
-            Failed to load movie{' '}
+            Failed to load movie{" "}
             <span role="img" aria-label="sad">
               😥
             </span>
@@ -29,11 +36,11 @@ function EditMovie() {
       );
     }
 
-    case 'SUCCESS': {
+    case "SUCCESS": {
       return (
         <div className="w-11/12 m-auto">
           <h3 className="text-2xl font-semibold mb-5">Edit movie</h3>
-          <MovieForm {...movie.data} isEditing={true} />
+          <MovieForm {...store.movieStore.currentMovie} isEditing={true} />
         </div>
       );
     }
@@ -42,6 +49,6 @@ function EditMovie() {
       return null;
     }
   }
-}
+});
 
 export default EditMovie;

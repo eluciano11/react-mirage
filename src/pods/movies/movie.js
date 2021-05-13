@@ -1,9 +1,10 @@
-import React, { useCallback, useReducer } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
 import { Link, useParams, useHistory } from "react-router-dom";
+import { observer } from "mobx-react-lite";
 
 import { Loader, Modal } from "../components/index";
-import { useMovie } from "./hooks/index";
 import MoviesResource from "./resource";
+import { useRootStore } from "../../context/root";
 
 const GENERIC_ERROR = {
   general:
@@ -98,8 +99,8 @@ function reducer(state = initialState, events) {
   }
 }
 
-export default function Movie() {
-  const movie = useMovie();
+const Movie = observer(() => {
+  const store = useRootStore();
   const history = useHistory();
   const { id } = useParams();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -122,7 +123,11 @@ export default function Movie() {
     dispatch({ type: action });
   }, []);
 
-  switch (movie.status) {
+  useEffect(() => {
+    store.movieStore.fetchMovie(id);
+  }, [id]);
+
+  switch (store.movieStore.status) {
     case "LOADING": {
       return (
         <div className="w-11/12 m-auto">
@@ -186,16 +191,18 @@ export default function Movie() {
             </div>
           </Modal>
           <h3 className="text-2xl font-semibold mb-2" data-testid="title">
-            {movie.data.title}{" "}
-            <span data-testid="release">({movie.data.release})</span>
+            {store.movieStore.currentMovie.title}{" "}
+            <span data-testid="release">
+              ({store.movieStore.currentMovie.release})
+            </span>
           </h3>
           <img
-            src={movie.data.poster}
+            src={store.movieStore.currentMovie.poster}
             alt="movie poster"
             style={{ height: 300, width: 300 }}
           />
           <p className="m-2" data-testid="synopsis">
-            {movie.data.synopsis}
+            {store.movieStore.currentMovie.synopsis}
           </p>
           <button
             className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold mr-2"
@@ -221,4 +228,6 @@ export default function Movie() {
       return null;
     }
   }
-}
+});
+
+export default Movie;

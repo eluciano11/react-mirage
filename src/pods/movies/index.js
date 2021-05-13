@@ -15,13 +15,10 @@ const STATES = {
 
 const Movies = observer(() => {
   const store = useRootStore();
-  console.log({ status: store.movieStore.status });
 
   useEffect(() => {
     store.movieStore.fetchMovies();
   }, []);
-
-  console.log({ status: store.movieStore.status });
 
   switch (store.movieStore.status) {
     case STATES.loading: {
@@ -62,8 +59,6 @@ const Movies = observer(() => {
             </div>
             <ul className="my-2 overflow-y" data-testid="movies">
               {store.movieStore.movies.map((movie, index) => {
-                console.log({ movie });
-
                 return (
                   <li
                     className={`border border-solid border-gray-200 border-r-0 border-l-0 ${

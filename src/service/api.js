@@ -61,8 +61,6 @@ class FetchAdapter {
 
     const data = await this.processResponse(res);
 
-    console.log({ data });
-
     return data;
   }
 
