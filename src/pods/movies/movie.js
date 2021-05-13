@@ -3,7 +3,6 @@ import { Link, useParams, useHistory } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
 import { Loader, Modal } from "../components/index";
-import MoviesResource from "./resource";
 import { useRootStore } from "../../context/root";
 
 const GENERIC_ERROR = {
@@ -109,7 +108,7 @@ const Movie = observer(() => {
     dispatch({ type: EVENTS.confirmed });
 
     try {
-      await MoviesResource.deleteMovie(id);
+      await store.movieStore.currentMovie.delete();
 
       history.push("/");
     } catch (error) {

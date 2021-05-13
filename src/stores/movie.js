@@ -109,7 +109,7 @@ class Movie {
   async delete() {
     await this.store.resource.deleteMovie(this.id);
 
-    this.store.removeMovie(this);
+    this.store.removeMovie(this.id);
   }
 
   updateFromJson(json) {
