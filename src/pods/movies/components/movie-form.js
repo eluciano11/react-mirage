@@ -1,11 +1,7 @@
-import React, { useCallback, useRef, useReducer } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import { useHistory } from "react-router-dom";
 
-import { useParams, useHistory } from "react-router-dom";
-import MoviesResource from "../resource";
-
-const GENERIC_ERROR = {
-  general: "Ops! Something went wrong, please try again!",
-};
+import { useRootStore } from "../../../context/root";
 
 function FormValidationError({ errors }) {
   this.type = "FormValidationError";
@@ -73,78 +69,20 @@ const STATES = {
   completed: "COMPLETED",
 };
 
-// Events that can trigger transitions on your states.
-const EVENTS = {
-  submitted: "SUBMITTED",
-  resolved: "RESOLVED",
-  rejected: "REJECTED",
-};
-
-const initialState = {
-  status: STATES.idle,
-  errors: null,
-};
-
-function reducer(state = initialState, event) {
-  switch (state.status) {
-    case STATES.failed:
-    case STATES.idle: {
-      // Reduce the scope of what can change my state.
-      switch (event.type) {
-        case EVENTS.submitted: {
-          return Object.assign({}, state, {
-            status: STATES.loading,
-            errors: null,
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    case STATES.loading: {
-      switch (event.type) {
-        case EVENTS.resolved: {
-          return Object.assign({}, state, {
-            status: STATES.completed,
-            errors: null,
-          });
-        }
-
-        case EVENTS.rejected: {
-          return Object.assign({}, state, {
-            status: STATES.failed,
-            errors: event.errors,
-          });
-        }
-
-        default: {
-          return state;
-        }
-      }
-    }
-
-    default: {
-      return state;
-    }
-  }
-}
-
-export default function MovieForm({ title, release, synopsis, isEditing }) {
+export default function MovieForm({ isEditing }) {
+  const store = useRootStore();
+  const history = useHistory();
+  const title = isEditing ? store.movieStore.currentMovie.title : "";
+  const release = isEditing ? store.movieStore.currentMovie.release : "";
+  const synopsis = isEditing ? store.movieStore.currentMovie.synopsis : "";
   const titleRef = useRef(title || null);
   const releaseRef = useRef(release || null);
   const synopsisRef = useRef(synopsis || null);
-  const { id } = useParams();
-  const history = useHistory();
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [formErrors, setFormErrors] = useState(null);
 
   const handleSubmit = useCallback(
     async (event) => {
       event.preventDefault();
-
-      dispatch({ type: EVENTS.submitted });
 
       try {
         const fields = {
@@ -153,40 +91,32 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
           synopsis: hasContent({ field: synopsisRef.current.value }),
         };
         const { cleanData } = validateForm({ fields });
+        const payload = {
+          data: {
+            type: "movies",
+            attributes: cleanData,
+          },
+        };
 
         if (isEditing) {
-          await MoviesResource.updateMovie(id, {
-            data: {
-              type: "movies",
-              attributes: cleanData,
-            },
-          });
+          await store.movieStore.updateMovie(payload);
         } else {
-          await MoviesResource.createMovie({
-            data: {
-              type: "movies",
-              attributes: cleanData,
-            },
-          });
+          await store.movieStore.createMovie(payload);
         }
 
-        dispatch({ type: EVENTS.resolved });
         history.push("/");
       } catch (error) {
-        const errors =
-          error.type === "FormValidationError" ? error.errors : GENERIC_ERROR;
-
-        dispatch({ type: EVENTS.rejected, errors });
+        setFormErrors(error.errors);
       }
     },
-    [history, id, isEditing]
+    [history, isEditing, store.movieStore]
   );
 
   return (
     <div>
-      {state.status === STATES.failed && (
+      {store.movieStore.status === STATES.failed && (
         <p className="text-red-500" data-testid="general-error">
-          {state.errors.general}
+          {store.movieStore.errors.general}
         </p>
       )}
       <form onSubmit={handleSubmit}>
@@ -201,11 +131,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="title"
             defaultValue={title}
-            disabled={state.status === STATES.loading}
+            disabled={store.movieStore.status === STATES.loading}
           />
-          {state.status === STATES.failed && (
+          {formErrors && (
             <p className="text-xs text-red-500" data-testid="title-error">
-              {state.errors.title}
+              {formErrors.title}
             </p>
           )}
         </div>
@@ -220,11 +150,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             type="text"
             data-testid="release"
             defaultValue={release}
-            disabled={state.status === STATES.loading}
+            disabled={store.movieStore.status === STATES.loading}
           />
-          {state.status === STATES.failed && (
+          {formErrors && (
             <p className="text-xs text-red-500" data-testid="release-error">
-              {state.errors.release}
+              {formErrors.release}
             </p>
           )}
         </div>
@@ -241,11 +171,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
             rows="10"
             data-testid="synopsis"
             defaultValue={synopsis}
-            disabled={state.status === STATES.loading}
+            disabled={store.movieStore.status === STATES.loading}
           ></textarea>
-          {state.status === STATES.failed && (
+          {formErrors && (
             <p className="text-xs text-red-500" data-testid="synopsis-error">
-              {state.errors.synopsis}
+              {formErrors.synopsis}
             </p>
           )}
         </div>
@@ -253,9 +183,11 @@ export default function MovieForm({ title, release, synopsis, isEditing }) {
           className="inline-block px-5 py-3 bg-green-500 rounded text-white font-semibold text-right"
           type="submit"
           data-testid="submit"
-          disabled={state.status === STATES.loading}
+          disabled={store.movieStore.status === STATES.loading}
         >
-          {state.status === STATES.loading ? "Submitting..." : "Submit"}
+          {store.movieStore.status === STATES.loading
+            ? "Submitting..."
+            : "Submit"}
         </button>
       </form>
     </div>

@@ -1,6 +1,10 @@
 import { nanoid } from "nanoid";
 import { makeObservable, observable, action, makeAutoObservable } from "mobx";
 
+const GENERIC_ERROR = {
+  general: "Ops! Something went wrong, please try again!",
+};
+
 // States that our UI could be in.
 const STATES = {
   idle: "IDLE",
@@ -14,6 +18,7 @@ export default class MovieStore {
   movies = [];
   status = STATES.idle;
   currentMovieId = null;
+  errors = null;
 
   constructor(resource) {
     makeObservable(this, {
@@ -22,7 +27,9 @@ export default class MovieStore {
       currentMovieId: observable,
       fetchMovies: action,
       fetchMovie: action,
-      removeMovie: action,
+      createMovie: action,
+      updateMovie: action,
+      deleteMovie: action,
     });
     this.resource = resource;
   }
@@ -49,8 +56,9 @@ export default class MovieStore {
         this.updateTodoFromServer(movie);
       });
       this.status = STATES.success;
-    } catch {
+    } catch (errors) {
       this.status = STATES.failed;
+      this.errors = errors;
     }
   }
 
@@ -67,16 +75,56 @@ export default class MovieStore {
 
         this.updateTodoFromServer(movie);
         this.status = STATES.success;
-      } catch {
+      } catch (errors) {
         this.status = STATES.failed;
+        this.errors = errors;
       }
     } else {
       this.status = STATES.success;
     }
   }
 
-  removeMovie(id) {
-    this.movies = this.movies.filter((movie) => movie.id !== id);
+  async createMovie(data) {
+    this.status = STATES.loading;
+
+    try {
+      const json = await this.resource.createMovie(data);
+      const movie = new Movie(this, json.id);
+
+      movie.updateFromJson(json.movie);
+      this.status = STATES.success;
+    } catch (errors) {
+      this.status = STATES.failed;
+      this.errors = GENERIC_ERROR;
+    }
+  }
+
+  async updateMovie(data) {
+    this.status = STATES.loading;
+
+    try {
+      const json = await this.resource.updateMovie(this.currentMovieId, data);
+
+      this.updateTodoFromServer(json.movie);
+      this.status = STATES.success;
+    } catch (errors) {
+      this.status = STATES.failed;
+      this.errors = GENERIC_ERROR;
+    }
+  }
+
+  async deleteMovie(id) {
+    this.status = STATES.loading;
+
+    try {
+      await this.resource.deleteMovie(id);
+
+      this.movies = this.movies.filter((movie) => movie.id !== id);
+      this.status = STATES.success;
+    } catch (errors) {
+      this.status = STATES.failed;
+      this.errors = errors;
+    }
   }
 
   updateTodoFromServer(json) {
@@ -109,10 +157,12 @@ class Movie {
     this.id = id;
   }
 
-  async delete() {
-    await this.store.resource.deleteMovie(this.id);
+  async update(data) {
+    await this.store.updateMovie(this.id, data);
+  }
 
-    this.store.removeMovie(this.id);
+  async delete() {
+    await this.store.deleteMovie(this.id);
   }
 
   updateFromJson(json) {
